@@ -7,6 +7,9 @@ import { EarthCanvas } from './canvas';
 import { SectionWrapper } from '../hoc';
 import { slideIn } from '../utils/motion';
 
+import { toast } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
+
 
 
 const Contact = () => {
@@ -46,7 +49,7 @@ const Contact = () => {
     )
     .then(() => {
       setLoading(false);
-      alert('Thank You. I Will Get Back To You as Soon as Possible');
+      toast.success("Thank you! I'll get back to you soon.");
 
       setForm({
         name: '',
@@ -56,7 +59,7 @@ const Contact = () => {
     }, (error) => {
       setLoading(false);
       console.log(error);
-      alert('Something Went Wrong.')
+      toast.error("Something went wrong. Please try again.");
     })
  }
 

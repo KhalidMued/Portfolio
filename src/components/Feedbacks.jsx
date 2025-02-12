@@ -41,11 +41,11 @@ const Feedbacks = () => {
         </motion.div>
       </div>
       <div className={`${styles.paddingX} -mt-20 pb-14 flex flex-wrap gap-7`}>
-        {testimonials.map((testimonials, index) => ( 
+        { false && testimonials.map((testimonial, index) => (  //Remove False to unhide Testimonies
           <FeedbackCard 
-          key={testimonials.name}
+          key={testimonial.id || index}
           index={index}
-          {...testimonials}
+          {...testimonial}
           />
           
           ))}

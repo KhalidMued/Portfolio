@@ -1,30 +1,20 @@
 import {
-    python,
     java,
+    flutter,
     robusta,
     mobile,
     backend,
-    creator,
     web,
     javascript,
     typescript,
     html,
     css,
     reactjs,
-    redux,
     tailwind,
     nodejs,
-    mongodb,
     git,
-    figma,
-    docker,
-    meta,
-    starbucks,
-    tesla,
-    shopify,
     carrent,
-    jobit,
-    tripguide,
+    qrgen,
     threejs,
   } from "../assets";
   
@@ -51,10 +41,6 @@ import {
     {
       title: "React Native Developer",
       icon: mobile,
-    },
-    {
-      title: "Backend Developer",
-      icon: backend,
     },
     {
       title: "Java Developer",
@@ -84,10 +70,6 @@ import {
       name: "React JS",
       icon: reactjs,
     },
-    /*{
-      name: "Redux Toolkit",
-      icon: redux,
-    },*/
     {
       name: "Tailwind CSS",
       icon: tailwind,
@@ -97,10 +79,6 @@ import {
       icon: nodejs,
     },
     {
-      name: "MongoDB",
-      icon: mongodb,
-    },
-    {
       name: "Three JS",
       icon: threejs,
     },
@@ -108,77 +86,13 @@ import {
       name: "git",
       icon: git,
     },
-    /*{
-      name: "figma",
-      icon: figma,
-    },*/
-    {
-      name: "docker",
-      icon: docker,
-    },
     {
       name: "Java",
       icon: java,
     },
-    {
-      name: "python",
-      icon: python,
-    },
   ];
   
   const experiences = [
-    {
-      title: "React.js Developer",
-      company_name: "Robusta",
-      icon: robusta,
-      iconBg: "#383E56",
-      date: "March 2020 - April 2021",
-      points: [
-        "Developing and maintaining web applications using React.js and other related technologies.",
-        "Collaborating with cross-functional teams including designers, product managers, and other developers to create high-quality products.",
-        "Implementing responsive design and ensuring cross-browser compatibility.",
-        "Participating in code reviews and providing constructive feedback to other developers.",
-      ],
-    },
-    {
-      title: "React Native Developer",
-      company_name: "Tesla",
-      icon:tesla,
-      iconBg: "#E6DEDD",
-      date: "Jan 2021 - Feb 2022",
-      points: [
-        "Developing and maintaining web applications using React.js and other related technologies.",
-        "Collaborating with cross-functional teams including designers, product managers, and other developers to create high-quality products.",
-        "Implementing responsive design and ensuring cross-browser compatibility.",
-        "Participating in code reviews and providing constructive feedback to other developers.",
-      ],
-    },
-    {
-      title: "Web Developer",
-      company_name: "Shopify",
-      icon: shopify,
-      iconBg: "#383E56",
-      date: "Jan 2022 - Jan 2023",
-      points: [
-        "Developing and maintaining web applications using React.js and other related technologies.",
-        "Collaborating with cross-functional teams including designers, product managers, and other developers to create high-quality products.",
-        "Implementing responsive design and ensuring cross-browser compatibility.",
-        "Participating in code reviews and providing constructive feedback to other developers.",
-      ],
-    },
-   /* {
-      title: "Full stack Developer",
-      company_name: "Meta",
-      icon: meta,
-      iconBg: "#E6DEDD",
-      date: "Jan 2023 - Present",
-      points: [
-        "Developing and maintaining web applications using React.js and other related technologies.",
-        "Collaborating with cross-functional teams including designers, product managers, and other developers to create high-quality products.",
-        "Implementing responsive design and ensuring cross-browser compatibility.",
-        "Participating in code reviews and providing constructive feedback to other developers.",
-      ],
-    },*/
     {
       title: "Java Developer",
       company_name: "Java",
@@ -192,40 +106,66 @@ import {
         "Participating in code reviews and providing constructive feedback to other developers.",
       ],
     },
+    {
+      title: "React.js Developer",
+      //company_name: "Robusta",
+      icon: robusta,
+      iconBg: "#383E56",
+      date: "March 2020 - April 2021",
+      points: [
+        "Developing and maintaining web applications using React.js and other related technologies.",
+        "Collaborating with cross-functional teams including designers, product managers, and other developers to create high-quality products.",
+        "Implementing responsive design and ensuring cross-browser compatibility.",
+        "Participating in code reviews and providing constructive feedback to other developers.",
+      ],
+    },
+    {
+      title: "Flutter Developer",
+      company_name: "Dart",
+      icon: flutter, // Make sure you have a valid Flutter logo
+      iconBg: "#E6DEDD",
+      date: "March 2023 - Present",
+      points: [
+        "Building and maintaining cross-platform mobile applications using Flutter.",
+        "Collaborating with UI/UX designers to create visually appealing mobile experiences.",
+        "Ensuring smooth performance and responsiveness of apps across different devices.",
+        "Writing clean and maintainable Dart code for mobile applications.",
+      ],
+    },
   ];
   
   const testimonials = [
     {
-      testimonial:
-        "I thought it was impossible to make a website as beautiful as our product, but Rick proved me wrong.",
-      name: "Sara Lee",
-      designation: "CFO",
-      company: "Acme Co",
-      image: "https://randomuser.me/api/portraits/women/4.jpg",
+      id: 1,
+      testimonial: "",
+      name: "",
+      designation: "",
+      company: "",
+      image: "",
     },
     {
-      testimonial:
-        "I've never met a web developer who truly cares about their clients' success like Rick does.",
-      name: "Chris Brown",
-      designation: "COO",
-      company: "DEF Corp",
-      image: "https://randomuser.me/api/portraits/men/5.jpg",
+      id: 2,
+      testimonial:"",
+      name: "",
+      designation: "",
+      company: "",
+      image: "",
     },
     {
-      testimonial:
-        "After Rick optimized our website, our traffic increased by 50%. We can't thank them enough!",
-      name: "Lisa Wang",
-      designation: "CTO",
-      company: "456 Enterprises",
-      image: "https://randomuser.me/api/portraits/women/6.jpg",
+      id: 3,
+      testimonial: "",
+      name: "",
+      designation: "",
+      company: "",
+      image: "",
     },
   ];
   
   const projects = [
     {
-      name: "Car Rent",
+      name: "Coffee Roastery",
       description:
-        "Web-based platform that allows users to search, book, and manage car rentals from various providers, providing a convenient and efficient solution for transportation needs.",
+        "Web-based platform designed for a coffee store, allowing users to explore the menu, place orders, and learn about the store’s offerings. Provides a seamless and engaging experience for coffee lovers, enhancing convenience and customer interaction.",
       tags: [
         {
           name: "react",
@@ -241,49 +181,28 @@ import {
         },
       ],
       image: carrent,
-      source_code_link: "https://github.com/",
+      source_code_Link: "https://github.com/KhalidMued/",
     },
     {
-      name: "Job IT",
+      name: "QrCode Generator",
       description:
-        "Web application that enables users to search for job openings, view estimated salary ranges for positions, and locate available jobs based on their current location.",
+        "I built a QR Code generator web app using React, allowing users to create and download custom QR Codes effortlessly.",
       tags: [
         {
-          name: "react",
+          name: "Reactjs",
           color: "blue-text-gradient",
         },
         {
-          name: "restapi",
+          name: "ReactPrime",
           color: "green-text-gradient",
         },
         {
-          name: "scss",
+          name: "QrCode",
           color: "pink-text-gradient",
         },
       ],
-      image: jobit,
-      source_code_link: "https://github.com/",
-    },
-    {
-      name: "Trip Guide",
-      description:
-        "A comprehensive travel booking platform that allows users to book flights, hotels, and rental cars, and offers curated recommendations for popular destinations.",
-      tags: [
-        {
-          name: "nextjs",
-          color: "blue-text-gradient",
-        },
-        {
-          name: "supabase",
-          color: "green-text-gradient",
-        },
-        {
-          name: "css",
-          color: "pink-text-gradient",
-        },
-      ],
-      image: tripguide,
-      source_code_link: "https://github.com/",
+      image: qrgen,
+      source_code_Link: "https://github.com/KhalidMued/QrCodeGenerator.git",
     },
   ];
   

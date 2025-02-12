@@ -45,14 +45,14 @@ const About = () => {
       variants={fadeIn("","",0.1,1)}
       className="mt-4 text-secondary test-[17px] max-w-3xl leading-[30px]"
       >
-        I'm a skilled software enthusiast with experience in JavaScript,
-          expertise in frameworks like Node.js, Three.js and React.
+        I'm a skilled software enthusiast with experience in Java, Dart, HTML, CSS, JavaScript,
+          expertise in frameworks like Node.js, Three.js, Flutter and React.
           I'm a quick learner and work closely with my clients to deliver their best projects.
            I aim to create efficient, acceptable, reliable, and evolving user-friendly solutions.
             Let's work together to bring your ideas to life.
       </motion.p>
 
-      <div className="mt-20 flex flex-wrap gap-10">
+      <div className="flex items-center justify-center h-full mt-20 flex-wrap gap-10">
       {services.map((service, index) => (
         <ServiceCard key={service.title} index=
         {index} {...service}/>
