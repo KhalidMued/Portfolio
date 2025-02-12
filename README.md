@@ -1,8 +1,17 @@
-# React + Vite
+# Portfolio Website 🚀  
+A modern and responsive personal portfolio website showcasing my projects, experience, and skills as a developer.
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+## 📌 Features  
+- 🎨 **Elegant UI** – Built with a sleek and interactive design using **React.js** and **Tailwind CSS**.  
+- 📂 **Project Showcase** – Highlights key projects with descriptions, images, and GitHub links.  
+- 🛠 **Skills & Experience** – Displays professional experience in an engaging **timeline format**.  
+- 📩 **Contact Form** – Users can send messages directly via **EmailJS** with real-time notifications.  
+- 🌎 **3D Elements** – Integrated **Three.js** for immersive 3D experiences.  
 
-Currently, two official plugins are available:
-
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react/README.md) uses [Babel](https://babeljs.io/) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+## 🛠 Technologies Used  
+- **React.js** – Frontend framework  
+- **Tailwind CSS** – Styling  
+- **Framer Motion** – Animations  
+- **Three.js & React Three Fiber** – 3D models  
+- **EmailJS** – Contact form handling  
+- **React Toastify** – User notifications  
