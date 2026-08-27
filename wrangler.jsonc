@@ -1,0 +1,10 @@
+{
+  // Minimal Cloudflare Workers config for this Vite SPA's CI deploy.
+  // The CI runs `wrangler deploy --assets ./dist`, which passes the static
+  // asset directory on the CLI; wrangler only needs the two required fields
+  // it can't infer — the Worker name (CI expects "portfolio") and a
+  // compatibility_date. Do NOT add an [assets] block here: `wrangler deploy`
+  // rejects declaring assets both on the CLI (--assets) and in config.
+  "name": "portfolio",
+  "compatibility_date": "2026-08-26"
+}
