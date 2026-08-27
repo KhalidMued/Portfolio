@@ -1,10 +1,19 @@
 {
-  // Minimal Cloudflare Workers config for this Vite SPA's CI deploy.
-  // The CI runs `wrangler deploy --assets ./dist`, which passes the static
-  // asset directory on the CLI; wrangler only needs the two required fields
-  // it can't infer — the Worker name (CI expects "portfolio") and a
-  // compatibility_date. Do NOT add an [assets] block here: `wrangler deploy`
-  // rejects declaring assets both on the CLI (--assets) and in config.
+  // Complete Cloudflare Workers config for this Vite SPA — the single source of
+  // truth so the deploy works regardless of the CI deploy command.
+  //
+  // The CI's `wrangler versions upload` / `wrangler deploy` needs: a Worker
+  // name (CI expects "portfolio"), a compatibility_date, and the static-asset
+  // directory to serve. All three live here now, so the deploy command needs NO
+  // flags. IMPORTANT: keep the deploy command as bare `npx wrangler deploy`
+  // (NOT `--assets ./dist`) — declaring assets both on the CLI and here errors.
   "name": "portfolio",
-  "compatibility_date": "2026-08-26"
+  "compatibility_date": "2026-08-26",
+  "assets": {
+    // Vite's production output, served as static files.
+    "directory": "./dist",
+    // Serve index.html for unknown paths (SPA fallback; the Workers equivalent
+    // of the Pages `_redirects` rule, which Workers static assets ignores).
+    "not_found_handling": "single-page-application"
+  }
 }
