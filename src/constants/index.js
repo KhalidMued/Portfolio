@@ -98,115 +98,87 @@ import {
   
   const experiences = [
     {
-      title: "Java Developer",
-      company_name: "Java",
+      title: "Job Title",
+      company_name: "Company Name",
       icon: java,
       iconBg: "#E6DEDD",
-      date: " Present",
+      date: "Start Date - End Date",
       points: [
-        "Developing and maintaining web applications using React.js and other related technologies.",
-        "Collaborating with cross-functional teams including designers, product managers, and other developers to create high-quality products.",
-        "Implementing responsive design and ensuring cross-browser compatibility.",
-        "Participating in code reviews and providing constructive feedback to other developers.",
+        "Key responsibility or achievement placeholder.",
+        "Key responsibility or achievement placeholder.",
+        "Key responsibility or achievement placeholder.",
       ],
     },
     {
-      title: "React.js Developer",
-      //company_name: "Robusta",
+      title: "Job Title",
+      company_name: "Company Name",
       icon: robusta,
       iconBg: "#383E56",
-      date: "March 2020 - April 2021",
+      date: "Start Date - End Date",
       points: [
-        "Developing and maintaining web applications using React.js and other related technologies.",
-        "Collaborating with cross-functional teams including designers, product managers, and other developers to create high-quality products.",
-        "Implementing responsive design and ensuring cross-browser compatibility.",
-        "Participating in code reviews and providing constructive feedback to other developers.",
+        "Key responsibility or achievement placeholder.",
+        "Key responsibility or achievement placeholder.",
+        "Key responsibility or achievement placeholder.",
       ],
     },
     {
-      title: "Flutter Developer",
-      company_name: "Dart",
-      icon: flutter, // Make sure you have a valid Flutter logo
+      title: "Job Title",
+      company_name: "Company Name",
+      icon: flutter,
       iconBg: "#E6DEDD",
-      date: "March 2023 - Present",
+      date: "Start Date - End Date",
       points: [
-        "Building and maintaining cross-platform mobile applications using Flutter.",
-        "Collaborating with UI/UX designers to create visually appealing mobile experiences.",
-        "Ensuring smooth performance and responsiveness of apps across different devices.",
-        "Writing clean and maintainable Dart code for mobile applications.",
+        "Key responsibility or achievement placeholder.",
+        "Key responsibility or achievement placeholder.",
+        "Key responsibility or achievement placeholder.",
       ],
     },
   ];
   
-  const testimonials = [
-    {
-      id: 1,
-      testimonial: "",
-      name: "",
-      designation: "",
-      company: "",
-      image: "",
-    },
-    {
-      id: 2,
-      testimonial:"",
-      name: "",
-      designation: "",
-      company: "",
-      image: "",
-    },
-    {
-      id: 3,
-      testimonial: "",
-      name: "",
-      designation: "",
-      company: "",
-      image: "",
-    },
-  ];
+  const testimonials = [];
   
   const projects = [
     {
-      name: "Coffee Roastery",
+      name: "Project Name",
       description:
-        "Web-based platform designed for a coffee store, allowing users to explore the menu, place orders, and learn about the store’s offerings. Provides a seamless and engaging experience for coffee lovers, enhancing convenience and customer interaction.",
+        "Short project description placeholder — what it does and the value it provides.",
       tags: [
         {
-          name: "react",
+          name: "tag1",
           color: "blue-text-gradient",
         },
         {
-          name: "mongodb",
+          name: "tag2",
           color: "green-text-gradient",
         },
         {
-          name: "tailwind",
+          name: "tag3",
           color: "pink-text-gradient",
         },
       ],
       image: carrent,
-      source_code_Link: "https://github.com/KhalidMued/",
+      source_code_Link: "https://github.com/username/repo",
     },
     {
-      name: "QrCode Generator",
+      name: "Project Name",
       description:
-        "I built a QR Code generator web app using React, allowing users to create and download custom QR Codes effortlessly.",
+        "Short project description placeholder — what it does and the value it provides.",
       tags: [
         {
-          name: "Reactjs",
+          name: "tag1",
           color: "blue-text-gradient",
         },
         {
-          name: "ReactPrime",
+          name: "tag2",
           color: "green-text-gradient",
         },
         {
-          name: "QrCode",
+          name: "tag3",
           color: "pink-text-gradient",
         },
       ],
       image: qrgen,
-      source_code_Link: "https://github.com/KhalidMued/QrCodeGenerator.git",
+      source_code_Link: "https://github.com/username/repo",
     },
   ];
   
