@@ -1,4 +1,3 @@
-import React from 'react'
 import { Tilt } from 'react-tilt'
 import { motion } from 'framer-motion';
 
@@ -45,11 +44,11 @@ const About = () => {
       variants={fadeIn("","",0.1,1)}
       className="mt-4 text-secondary test-[17px] max-w-3xl leading-[30px]"
       >
-        I'm a skilled software enthusiast with experience in Java, Dart, HTML, CSS, JavaScript,
+        I&apos;m a skilled software enthusiast with experience in Java, Dart, HTML, CSS, JavaScript,
           expertise in frameworks like Node.js, Three.js, Flutter and React.
-          I'm a quick learner and work closely with my clients to deliver their best projects.
+          I&apos;m a quick learner and work closely with my clients to deliver their best projects.
            I aim to create efficient, acceptable, reliable, and evolving user-friendly solutions.
-            Let's work together to bring your ideas to life.
+            Let&apos;s work together to bring your ideas to life.
       </motion.p>
 
       <div className="flex items-center justify-center h-full mt-20 flex-wrap gap-10">
