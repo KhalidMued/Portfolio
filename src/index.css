@@ -4,13 +4,45 @@
 @tailwind components;
 @tailwind utilities;
 
+/*
+ * Theme tokens as "R G B" triplets for Tailwind's rgb(var(--x) / <alpha-value>) pattern.
+ * :root = light theme. .dark = the ORIGINAL dark theme values, kept byte-for-byte identical
+ * to what this site shipped with before light mode existed.
+ */
+:root {
+  --color-primary: 244 244 251; /* #f4f4fb page bg */
+  --color-secondary: 74 71 98; /* #4a4762 muted text */
+  --color-tertiary: 255 255 255; /* #ffffff card/surface bg */
+  --color-black-100: 236 234 252; /* #eceafc panel bg */
+  --color-black-200: 228 225 245; /* #e4e1f5 panel bg */
+  --color-white-100: 26 23 48; /* #1a1730 heading/body text on dark surfaces */
+  --color-heading: 26 23 48; /* #1a1730 was-hardcoded text-white */
+  --color-hero-subtext: 75 68 112; /* #4b4470 was-hardcoded #dfd9ff */
+  color-scheme: light;
+}
+
+.dark {
+  --color-primary: 5 8 22; /* #050816 */
+  --color-secondary: 170 166 195; /* #aaa6c3 */
+  --color-tertiary: 21 16 48; /* #151030 */
+  --color-black-100: 16 13 37; /* #100d25 */
+  --color-black-200: 9 3 37; /* #090325 */
+  --color-white-100: 243 243 243; /* #f3f3f3 */
+  --color-heading: 255 255 255; /* #ffffff */
+  --color-hero-subtext: 223 217 255; /* #dfd9ff */
+  color-scheme: dark;
+}
+
 * {
   margin: 0;
   padding: 0;
   box-sizing: border-box;
   font-family: "Poppins", sans-serif;
   scroll-behavior: smooth;
-  color-scheme: dark;
+}
+
+body {
+  transition: background-color 0.3s ease, color 0.3s ease;
 }
 
 .hash-span {
@@ -19,7 +51,199 @@
   display: block;
 }
 
+/*
+ * Hero background. Dark mode: the shipped herobg.png at full richness, unchanged.
+ * Light mode reuses the SAME image rather than a flat gradient: a ::before layer
+ * carries it through invert()+hue-rotate(180deg), which flips the dark-navy field
+ * to near-white and re-lands the violet line art back in the violet family (the
+ * source art is already blue-violet, so a 180deg rotation after inversion keeps
+ * it on-brand instead of drifting to an unrelated hue). A ::after scrim keeps the
+ * hero heading readable over the busier top-left area of the pattern.
+ */
+.bg-hero-pattern {
+  /* isolation:isolate makes this element's OWN background paint as the base layer
+     of its OWN local stacking context, with its negative-z-index ::before/::after
+     pseudo-elements layered above it (correct visual order: gradient, then image,
+     then scrim). Without isolation, this box has no stacking context of its own, so
+     its opaque background-image gets painted at the "in-flow descendant" step of
+     the page's ROOT stacking context — which is AFTER (on top of) the negative
+     z-index ::before/::after, which get individually promoted to that root context
+     instead. That completely hid the starfield image under the flat gradient (t10).
+     Navbar used to be a child of this div, which is why isolation was removed in
+     t8 — a fixed, z-20 descendant gets trapped inside whatever stacking context its
+     ancestor forms, so it couldn't compete against later sibling sections once
+     scrolled past. Navbar now lives as this div's SIBLING in App.jsx instead (moved
+     in t10), so isolating this element again is safe: nothing inside it needs to
+     escape to the page's root stacking context anymore. */
+  position: relative;
+  isolation: isolate;
+  /* t12 supersedes t11's approach to the bottom boundary (see .hero-transition
+     below, which now owns the entire hand-off to the next section, including a
+     premium curved+glow treatment instead of a flat color-matched band). This
+     stays a simple two-stop wash — lavender to near-white — the SAME tone
+     .hero-transition's own top edge starts from, so there's no seam between
+     this box's plain background and the dedicated transition layer sitting
+     on top of its lower portion. It intentionally does NOT reach all the way
+     to rgb(var(--color-primary)) on its own anymore. */
+  background-image: linear-gradient(to bottom, #efe9fb 0%, #f8f6fd 100%);
+}
+
+.bg-hero-pattern::before,
+.bg-hero-pattern::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+}
+
+.bg-hero-pattern::before {
+  background-image: url("/src/assets/herobg.png");
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  filter: invert(1) hue-rotate(180deg) saturate(1.3) brightness(1.05) contrast(0.93);
+  /* Full opacity: with the paint-order fixed (see the isolation comment above),
+     this now actually sits above the base gradient, so it can carry the same
+     full-strength presence dark gets instead of a diluted blend. */
+  opacity: 1;
+  /* Fade the starfield texture out before the hero's bottom edge, instead of
+     letting it cut off abruptly where the next section begins. This is the ONLY
+     thing that should soften it — opacity stays at 1 everywhere above the fade.
+     Fully transparent by 75%, comfortably before .hero-transition's own zone
+     (the last ~170-210px) takes over — no residual line-art texture competes
+     with that dedicated layer's own curve/glow near the very bottom. */
+  mask-image: linear-gradient(to bottom, black 0%, black 55%, transparent 75%);
+  -webkit-mask-image: linear-gradient(to bottom, black 0%, black 55%, transparent 75%);
+}
+
+.bg-hero-pattern::after {
+  /* Slightly stronger than before now that ::before runs at full opacity, so the
+     heading/subtext keep clear AA contrast over the busiest part of the pattern. */
+  background: radial-gradient(
+    circle at 22% 38%,
+    rgba(255, 255, 255, 0.75),
+    rgba(255, 255, 255, 0) 60%
+  );
+}
+
+.dark .bg-hero-pattern {
+  background-image: url("/src/assets/herobg.png");
+}
+
+.dark .bg-hero-pattern::before,
+.dark .bg-hero-pattern::after {
+  content: none;
+}
+
+/*
+ * t12 — premium hero -> About hand-off (light only; supersedes t11's flat band).
+ * A dedicated element (a real DOM node, not a pseudo-element — .bg-hero-pattern's
+ * own ::before/::after are already taken by the starfield image and its contrast
+ * scrim) covering the hero's last ~170-210px. It owns:
+ *  1. an ambient lavender glow (translucent radial tint, not a box-shadow —
+ *     "environmental light" reads as a soft color wash, not a discrete shape),
+ *  2. the entire white -> page-bg color transition, via an ELLIPTICAL (not
+ *     linear) gradient. An ellipse's iso-color contours are natively curved, so
+ *     the "shallow curved boundary" the spec wants falls out of gradient math —
+ *     no clip-path/border-radius hard cut that could itself become a new seam
+ *     if the colors on either side of the cut didn't line up exactly.
+ * The ellipse is deliberately wide (200% of this element's own width) so its
+ * curvature is gentle: the color-stop position (in px) varies by roughly
+ * 10-15px between the horizontal center and the edges — modest, intentionally
+ * on the subtle end of the spec's ~20-40px range. A tighter ellipse gives more
+ * visible curvature but risks a slightly uneven top edge (the two goals pull in
+ * opposite directions for a single ellipse); this leans toward "no seam" since
+ * that was the spec's explicit top priority. Percentage width keeps it fluid
+ * across viewport sizes; only the vertical radius/offset are fixed px, which is
+ * correct here — the human's ~20-40px target is an absolute amplitude, not
+ * something that should grow on a wider screen.
+ */
+.hero-transition {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  height: clamp(170px, 20vh, 210px);
+  z-index: -1;
+  pointer-events: none;
+  background:
+    radial-gradient(
+      ellipse 70% 140% at 50% 0%,
+      rgba(125, 80, 255, 0.12) 0%,
+      rgba(150, 110, 255, 0.06) 42%,
+      transparent 74%
+    ),
+    radial-gradient(
+      ellipse 200% 300px at 50% -150px,
+      #f8f6fd 50%,
+      rgb(var(--color-primary)) 100%
+    );
+}
+
+.dark .hero-transition {
+  display: none;
+}
+
+/*
+ * Navbar surface. Dark mode: the original flat, fully opaque bg-primary bar,
+ * unchanged. Light mode: a translucent, blurred "frosted glass" surface instead
+ * of a flat color — since it's semi-transparent everywhere, it naturally reads
+ * as continuous with whatever's behind it at every scroll position (the hero's
+ * gradient/starfield up top, the plain page bg further down, a panel edge),
+ * rather than sitting as a hard opaque band against three different tones.
+ */
+.navbar-surface {
+  background-color: rgb(var(--color-primary) / 0.75);
+  backdrop-filter: blur(16px) saturate(1.4);
+  -webkit-backdrop-filter: blur(16px) saturate(1.4);
+  border-bottom: 1px solid rgba(26, 23, 48, 0.06);
+}
+
+.dark .navbar-surface {
+  background-color: rgb(var(--color-primary) / 1);
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
+  border-bottom: none;
+}
+
+/* Light-mode-only page depth: a faint brand-violet wash behind the whole app
+   so the page reads as more than solid color. */
+.page-depth {
+  position: relative;
+}
+
+.page-depth::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+  background: radial-gradient(circle at 12% 0%, rgba(145, 94, 255, 0.1), rgba(145, 94, 255, 0) 45%),
+    radial-gradient(circle at 88% 18%, rgba(145, 94, 255, 0.08), rgba(145, 94, 255, 0) 40%);
+}
+
+.dark .page-depth::before {
+  content: none;
+}
+
+/* Light-mode-only card elevation for the main surface cards (About/Works/Contact). */
+.surface-elevate {
+  box-shadow: 0 1px 2px rgba(26, 23, 48, 0.05), 0 12px 28px -14px rgba(26, 23, 48, 0.18);
+  border: 1px solid rgba(26, 23, 48, 0.06);
+}
+
+.dark .surface-elevate {
+  box-shadow: none;
+  border: none;
+}
+
 .black-gradient {
+  background: linear-gradient(to right, #f4f2fb, #ffffff);
+  box-shadow: 0 1px 6px rgba(26, 23, 48, 0.18);
+}
+
+.dark .black-gradient {
   background: #000000; /* fallback for old browsers */
   background: -webkit-linear-gradient(
     to right,
@@ -31,6 +255,7 @@
     #434343,
     #000000
   ); /* W3C, IE 10+/ Edge, Firefox 16+, Chrome 26+, Opera 12+, Safari 7+ */
+  box-shadow: none;
 }
 
 .violet-gradient {

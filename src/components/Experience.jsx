@@ -6,11 +6,20 @@ import { styles } from '../styles';
 import { experiences } from '../constants';
 import { SectionWrapper } from '../hoc';
 import { textVariant } from '../utils/motion';
+import { useTheme } from '../context/ThemeContext';
 
-const ExperienceCard = ( {experience} ) => (
+const ExperienceCard = ( {experience} ) => {
+  const { theme } = useTheme();
+  const isDark = theme === 'dark';
+
+  return (
   <VerticalTimelineElement
-  contentStyle={{background : '#1d1836', color: '#fff'}}
-  contentArrowStyle={{ borderRight: '7px solid #232631'}}
+  contentStyle={
+    isDark
+      ? { background: '#1d1836', color: '#fff' }
+      : { background: '#ffffff', color: '#1a1730', boxShadow: '0 3px 10px rgba(26,23,48,0.15)' }
+  }
+  contentArrowStyle={{ borderRight: isDark ? '7px solid #232631' : '7px solid #ffffff' }}
   date={experience.date}
   iconStyle={{ background: experience.iconBg }}
   icon={
@@ -24,7 +33,7 @@ const ExperienceCard = ( {experience} ) => (
   }
   >
     <div>
-      <h3 className="text-white text-[24px] font-bold"> {experience.title} </h3>
+      <h3 className="text-heading text-[24px] font-bold"> {experience.title} </h3>
       <p className="text-secondary text-[16px] text-semibold"
        style={{margin: 0}}
        > {experience.company_name} </p>
@@ -41,7 +50,8 @@ const ExperienceCard = ( {experience} ) => (
     )}
     </ul>
   </VerticalTimelineElement>
-)
+  )
+}
 
 
 const Experience = () => {

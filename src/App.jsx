@@ -8,10 +8,11 @@ import { About, Contact, Experience, Feedbacks, Hero, Navbar, Tech, Works, Stars
 const App = () => {
   return (
     <BrowserRouter>
-      <div className='relative z-0 bg-primary'>
+      <div className='relative z-0 bg-primary page-depth'>
+        <Navbar />
         <div className='bg-hero-pattern bg-cover bg-no-repeat bg-center'>
-          <Navbar />
           <Hero />
+          <div className="hero-transition" aria-hidden="true" />
         </div>
         <About />
         <Experience />
