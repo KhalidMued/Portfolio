@@ -16,7 +16,7 @@ return(
       scale: 1,
       speed: 450,
     }}
-    className="bg-tertiary p-5 rounded-2xl w-[360px] min-h-[500px] flex flex-col justify-between"
+    className="bg-tertiary surface-elevate p-5 rounded-2xl w-[360px] min-h-[500px] flex flex-col justify-between"
 
     >
       <div className="relative w-full h-[230px]">
@@ -38,7 +38,7 @@ return(
         </div>
       </div>
       <div className="mt-5">
-      <h3 className="text-white font-bold text-[24px]">{name}</h3>
+      <h3 className="text-heading font-bold text-[24px]">{name}</h3>
       <p className="mt-2 text-secondary text-[14px]">{description}</p>
       </div>
 
