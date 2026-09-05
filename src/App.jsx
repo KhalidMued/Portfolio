@@ -1,3 +1,4 @@
+import { Suspense } from "react";
 import { BrowserRouter } from "react-router-dom";
 import { ToastContainer } from "react-toastify"; // Import ToastContainer
 import "react-toastify/dist/ReactToastify.css"; // Import styles
@@ -21,7 +22,12 @@ const App = () => {
         <Feedbacks />
         <div className='relative z-0'>
           <Contact />
-          <StarsCanvas />
+          {/* Absolutely positioned decorative background layer (inset-0, z-[-1]
+              inside StarsCanvas itself) — it never occupies flow space, so no
+              fallback content is needed to avoid layout shift. */}
+          <Suspense fallback={null}>
+            <StarsCanvas />
+          </Suspense>
         </div>
       </div>
 

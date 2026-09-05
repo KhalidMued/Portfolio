@@ -1,4 +1,4 @@
-import { useState, useRef } from 'react';
+import { useState, useRef, Suspense } from 'react';
 import { motion } from 'framer-motion';
 import emailjs from '@emailjs/browser';
 
@@ -10,10 +10,11 @@ import { slideIn } from '../utils/motion';
 import { toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 
-
+const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
 const Contact = () => {
   const formRef = useRef();
+  const honeypotRef = useRef();
   const [form, setForm] = useState({
     name: '',
     email: '',
@@ -29,19 +30,34 @@ const Contact = () => {
 
  const handleSubmit = (e) => {
   e.preventDefault();
-  setLoading(true);
 
-//2CJVeRwsf_o57mnSM
+  // Honeypot: real visitors never see or fill this field, so any value here
+  // means a bot filled every input it could find — drop the submission
+  // silently, no error shown, no request sent.
+  if (honeypotRef.current?.value) {
+    return;
+  }
+
+  const name = form.name.trim();
+  const email = form.email.trim();
+  const message = form.message.trim();
+
+  if (!name || !email || !message || !EMAIL_PATTERN.test(email)) {
+    toast.error('Please fill in all fields with a valid email address.');
+    return;
+  }
+
+  setLoading(true);
 
   emailjs.send(
     'service_ptvv27j',
     'template_7iy3t04',
     {
-      from_name: form.name,
+      from_name: name,
       to_name:'Khalid',
-      from_email: form.email,
+      from_email: email,
       to_email:'khalid.mued@gmail.com',
-      message: form.message,
+      message: message,
     },
     '2CJVeRwsf_o57mnSM'
     )
@@ -56,7 +72,7 @@ const Contact = () => {
       })
     }, (error) => {
       setLoading(false);
-      console.log(error);
+      if (import.meta.env.DEV) console.error(error);
       toast.error("Something went wrong. Please try again.");
     })
  }
@@ -75,6 +91,19 @@ const Contact = () => {
         onSubmit={handleSubmit}
         className="mt-12 flex flex-col gap-8"
         >
+          {/* Honeypot: visually hidden and unreachable by keyboard/screen reader
+              for real users, but a plain <input> a naive bot's form-filler will
+              still find and populate. */}
+          <input
+           type="text"
+           name="contact_hp"
+           ref={honeypotRef}
+           tabIndex={-1}
+           autoComplete="off"
+           aria-hidden="true"
+           className="absolute -left-[9999px] w-px h-px overflow-hidden"
+          />
+
           <label className="flex flex-col">
             <span className="text-heading font-medium mb-4">Your Name</span>
             <input
@@ -83,8 +112,10 @@ const Contact = () => {
              value={form.name}
              onChange={handleChange}
              placeholder="What's Your name?"
+             required
+             maxLength={100}
              className="bg-tertiary py-4 px-6 placeholder:text-secondary
-              text-heading rounded-lg outlined-none border-none font-medium"
+              text-heading rounded-lg outline-none border-none font-medium"
             />
           </label>
 
@@ -96,8 +127,11 @@ const Contact = () => {
              value={form.email}
              onChange={handleChange}
              placeholder="What's Your email?"
+             required
+             maxLength={254}
+             pattern="[^\s@]+@[^\s@]+\.[^\s@]+"
              className="bg-tertiary py-4 px-6 placeholder:text-secondary
-              text-heading rounded-lg outlined-none border-none font-medium"
+              text-heading rounded-lg outline-none border-none font-medium"
             />
           </label>
 
@@ -109,8 +143,10 @@ const Contact = () => {
             value={form.message}
             onChange={handleChange}
             placeholder="What Do You Want To Say"
+            required
+            maxLength={2000}
             className="bg-tertiary py-4 px-6 placeholder:text-secondary
-              text-heading rounded-lg outlined-none border-none font-medium"
+              text-heading rounded-lg outline-none border-none font-medium"
             />
           </label>
 
@@ -128,8 +164,11 @@ const Contact = () => {
       variants={slideIn('right', "tween", 0.2, 1)}
       className="xl:flex-1 xl:h-auto md:h-[550px] h-[350px]"
       >
-        
-        <EarthCanvas />
+        {/* This wrapper's own size classes are fixed regardless of the fallback,
+            so there's no layout shift while the 3D chunk loads. */}
+        <Suspense fallback={<div className="w-full h-full" />}>
+          <EarthCanvas />
+        </Suspense>
       </motion.div>
 
     </div>

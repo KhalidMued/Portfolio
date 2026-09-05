@@ -1,0 +1,7 @@
+# Pin the files whose exact served bytes matter to LF, so they are deterministic
+# across build environments (CI builds on Linux; contributors may be on Windows
+# with core.autocrlf=true). index.html carries an inline script whose SHA-256 is
+# pinned in the CSP (public/_headers); a line-ending flip would change that hash
+# and break the Content-Security-Policy in production.
+index.html      text eol=lf
+public/_headers text eol=lf
