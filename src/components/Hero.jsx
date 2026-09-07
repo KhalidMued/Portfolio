@@ -1,3 +1,4 @@
+import { Suspense } from 'react';
 import { motion } from 'framer-motion';
 import { styles } from '../styles'
 import { ComputersCanvas } from './canvas';
@@ -22,7 +23,12 @@ const Hero = () => {
         </div>
         </div>
 
-        <ComputersCanvas />
+        {/* Section height is fixed (h-screen) regardless of this element, so there's
+            no layout-shift risk either way — the fallback just avoids a jarring
+            empty gap while the 3D chunk loads. */}
+        <Suspense fallback={<div className="w-full h-full" />}>
+          <ComputersCanvas />
+        </Suspense>
 
         <div className="absolute xs:bottom-10 bottom-32 w-full flex justify-center items-center">
           <a href="#about">

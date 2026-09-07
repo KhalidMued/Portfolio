@@ -1,0 +1,26 @@
+# Security headers for the Cloudflare Workers static-assets deploy.
+# Workers static assets parses this file (it is NOT served as an asset) and
+# attaches the headers below to every response. Vite copies public/ -> dist/
+# verbatim, so no wrangler.jsonc change is required.
+# Docs: https://developers.cloudflare.com/workers/static-assets/headers/
+#
+# CSP scope, verified against the production bundle (dist/):
+#   - scripts: self + the single inline theme-bootstrap <script> in index.html
+#     (SHA-256 hash below, computed over LF-normalized bytes). WARNING: ANY edit
+#     to that inline script changes its hash and WILL break the page — update the
+#     hash in the same commit, or better, move the bootstrap to an external file
+#     so the hash can be dropped. NOTE: index.html is pinned to LF via
+#     .gitattributes so the served bytes (and thus this hash) are deterministic
+#     across build environments (the CI builds on Linux; devs may be on Windows).
+#   - styles: self + Google Fonts CSS (fonts.googleapis.com) + 'unsafe-inline'
+#     for React/framer-motion style attributes.
+#   - fonts: fonts.gstatic.com (the actual .woff2 files).
+#   - connect: self + EmailJS API (api.emailjs.com) — the only runtime fetch.
+#   - img data:/blob: for Vite data-URI assets and three.js texture handling.
+/*
+  Content-Security-Policy: default-src 'self'; script-src 'self' 'sha256-Q0q6g+lWQIIJli6kaOpw+4w3Xpgrl2lA+0TEWy/eejA='; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data: blob:; connect-src 'self' https://api.emailjs.com; worker-src 'self' blob:; object-src 'none'; base-uri 'self'; form-action 'self'; frame-ancestors 'none'; upgrade-insecure-requests
+  X-Content-Type-Options: nosniff
+  X-Frame-Options: DENY
+  Referrer-Policy: strict-origin-when-cross-origin
+  Permissions-Policy: camera=(), microphone=(), geolocation=(), payment=(), usb=(), interest-cohort=()
+  Strict-Transport-Security: max-age=31536000; includeSubDomains
