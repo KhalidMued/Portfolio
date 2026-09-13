@@ -1,17 +1,46 @@
-# Portfolio Website 🚀  
-A modern and responsive personal portfolio website showcasing my projects, experience, and skills as a developer.
+# Portfolio — Khalid Mohamed 🚀
 
-## 📌 Features  
-- 🎨 **Elegant UI** – Built with a sleek and interactive design using **React.js** and **Tailwind CSS**.  
-- 📂 **Project Showcase** – Highlights key projects with descriptions, images, and GitHub links.  
-- 🛠 **Skills & Experience** – Displays professional experience in an engaging **timeline format**.  
-- 📩 **Contact Form** – Users can send messages directly via **EmailJS** with real-time notifications.  
-- 🌎 **3D Elements** – Integrated **Three.js** for immersive 3D experiences.  
+Personal portfolio for **Khalid Mohamed**, Developer and Network & Security
+Engineer — built around the idea that both sides are one engineer, not two
+separate résumés. The site shows software projects and network/security
+work side by side (Skills, Works) with a shared color system tying them
+together.
 
-## 🛠 Technologies Used  
-- **React.js** – Frontend framework  
-- **Tailwind CSS** – Styling  
-- **Framer Motion** – Animations  
-- **Three.js & React Three Fiber** – 3D models  
-- **EmailJS** – Contact form handling  
-- **React Toastify** – User notifications  
+> For current project status, open threads, and a full changelog, see
+> [`STATUS.md`](./STATUS.md) and [`LEDGER.md`](./LEDGER.md). For
+> architecture notes and conventions, see [`CLAUDE.md`](./CLAUDE.md).
+
+## Features
+
+- 🎨 Two-sided design — Developer and Network & Security content are
+  visually distinguished throughout (Skills tabs, Works tabs, Experience
+  badges, Credentials) via a shared accent-color system.
+- 📂 Project showcase, split into Developer Projects and Network & Security
+  Projects, with a featured flagship project and custom SVG cover art.
+- 🛠 Skills grouped into Development / Network & Security / Infrastructure &
+  Systems / AI & Engineering Tools.
+- 🧭 Work experience timeline with category badges and a credentials strip.
+- 📩 Contact form via EmailJS with real-time toast notifications.
+- 🌎 3D elements via Three.js / React Three Fiber (hero desk scene, earth,
+  starfield background).
+- 🌗 Light/dark theme toggle.
+
+## Tech stack
+
+- React.js + Vite
+- Tailwind CSS
+- Framer Motion
+- Three.js & React Three Fiber
+- `react-icons` (Simple Icons + Font Awesome 6) for all tech/skill icons
+- EmailJS
+- React Toastify
+
+## Getting started
+
+```bash
+npm install
+npm run dev       # dev server
+npm run build     # production build -> dist/
+npm run preview   # serve the production build locally
+npm run lint       # ESLint
+```
