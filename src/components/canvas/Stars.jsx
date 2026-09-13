@@ -11,8 +11,8 @@ const Stars = ({ theme, ...props }) => {
   const sphere = random.inSphere(new Float32Array (5000), { radius: 1.2 })
 
   useFrame((state, delta) => {
-    ref.current.rotation.x -= delta / 10;
-    ref.current.rotation.y -= delta / 15;
+    ref.current.rotation.x -= delta / 40;
+    ref.current.rotation.y -= delta / 60;
 
   })
   return (
@@ -34,7 +34,7 @@ const StarsCanvas = () => {
   const { theme } = useTheme();
 
   return(
-    <div className="w-full h-auto absolute inset-0 z-[-1]">
+    <div className="w-full h-auto fixed inset-0 z-[-1]">
       <Canvas camera={{ position: [0, 0, 1]}}>
         <Suspense fallback={null}>
         <Stars theme={theme} />

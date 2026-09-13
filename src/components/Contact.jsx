@@ -86,6 +86,11 @@ const Contact = () => {
       >
         <p className={styles.sectionSubText}>Get in Touch</p>
         <h3 className={styles.sectionHeadText}>Contact.</h3>
+        <p className="mt-4 text-secondary text-[15px] leading-[26px] max-w-[420px]">
+          Got an app to build, a network to untangle, or a system that mysteriously
+          &quot;worked yesterday&quot;? Whether it&apos;s development, infrastructure, or
+          security, I&apos;d be happy to talk.
+        </p>
         <form
         ref={formRef}
         onSubmit={handleSubmit}
