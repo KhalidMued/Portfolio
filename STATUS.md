@@ -150,6 +150,14 @@ Known gaps:
     mode keeps an opaque base (that's what keeps the starfield out of the
     hero, as requested) and needs no wash-matching since its image field
     is exactly `--color-primary`.
+15. Hero scroll indicator no longer sits on top of the 3D desk. The desk
+    leaves only a narrow clear band at the very bottom of the hero (~7% of
+    the hero's height, so ~57px on an 847px-tall viewport), which is less
+    than the old indicator needed (64px tall + a 40px offset). Moved it
+    down (`xs:bottom-10` → `xs:bottom-2`) and sized it to fit that band
+    (`35x64` → `26x36`, thinner border, smaller dot, shorter travel) — 44px
+    total, so it still clears on viewports down to ~650px tall. Mobile's
+    offset (`bottom-32`) is untouched.
 
 ## Git state
 
