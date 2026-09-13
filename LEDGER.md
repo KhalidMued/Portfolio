@@ -359,3 +359,32 @@ of back-and-forth. Two things that fixed it: prefer plain `screenshot`
 over `zoom`, and if the zoom is already stuck, serve the dev server on a
 different origin (`npm run dev -- --host 127.0.0.1`, then browse
 `http://127.0.0.1:5173`) to get a fresh origin at 100% zoom.
+
+**Hero scroll indicator: dead click area + bigger oval wheel**: Khalid
+reported the scroll-down button only responded along its top edge, and
+asked for the moving dot inside it to be larger and oval.
+
+The click bug was NOT in the button. Probed it with
+`document.elementFromPoint` across the pill: the top ~5% hit the anchor,
+everything below hit `span.hash-span`. That's the invisible scroll-anchor
+offset spacer `SectionWrapper` renders for every section
+(`margin-top:-100px; padding-bottom:100px`) — a ~124px-tall box pulled up
+100px into the *previous* section. Because every SectionWrapper section is
+`relative z-0` (its own stacking context, painted above earlier siblings),
+that spacer sat on top of the last ~100px of whatever preceded it. The
+hero's indicator lives in exactly that band, so all but its top sliver was
+dead. Note this was a pre-existing, site-wide dead zone — the bottom
+~100px of every section — that only became obvious once the indicator was
+moved down in PR #9.
+
+Fixed at the root: `pointer-events: none` on `.hash-span` in `index.css`.
+It's an empty spacer; it should never be a hit-test target. Verified with
+a 15-point probe grid across the pill (was 1/5 clickable, now 15/15) and
+by actually clicking the pill's lower half — the URL went to `#about`.
+
+Also, per the request: the dot is now `w-[5px] h-[9px]` (a vertical
+capsule rather than a 6px circle) with travel retuned to `[0, 11, 0]` for
+the 22px inner track, and `mb-1` dropped. And the anchor got `block p-2`,
+which grows the tap target from 26x36 to 42x52 without moving the pill —
+the wrapper offset went `xs:bottom-2` → `xs:bottom-0` to compensate, so
+the pill still sits 8px above the hero's bottom edge exactly as before.

@@ -52,10 +52,21 @@ body {
   transition: background-color 0.3s ease, color 0.3s ease;
 }
 
+/*
+ * Invisible scroll-anchor offset, so `#section` links don't land underneath the
+ * fixed navbar. The negative margin + padding makes it a ~124px-tall box pulled
+ * up into the PREVIOUS section — and since every SectionWrapper section is
+ * `relative z-0` (its own stacking context, painted above the earlier ones),
+ * that box sat on top of the last ~100px of whatever came before it and ate
+ * clicks there. It's an empty spacer, so it must never be a hit-test target:
+ * that dead zone is what made the hero's scroll-down button clickable only
+ * along its top few pixels.
+ */
 .hash-span {
   margin-top: -100px;
   padding-bottom: 100px;
   display: block;
+  pointer-events: none;
 }
 
 /*

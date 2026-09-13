@@ -158,6 +158,16 @@ Known gaps:
     (`35x64` → `26x36`, thinner border, smaller dot, shorter travel) — 44px
     total, so it still clears on viewports down to ~650px tall. Mobile's
     offset (`bottom-32`) is untouched.
+16. Hero scroll indicator was only clickable along its top few pixels —
+    caused by `.hash-span`, the invisible scroll-anchor offset spacer that
+    every `SectionWrapper` section renders. It's ~124px tall and pulled up
+    100px into the PREVIOUS section, and since each section is `relative
+    z-0` it painted above the hero and swallowed clicks in that band.
+    Fixed at the root with `pointer-events: none` on `.hash-span`, which
+    also clears the same dead zone in the bottom ~100px of every other
+    section. The indicator also got a 42x52 tap target (padding on the
+    anchor, offset compensated so it doesn't move) and a bigger oval
+    "wheel" (`w-[5px] h-[9px]`).
 
 ## Git state
 
