@@ -294,3 +294,46 @@ pixel aspect ratio, then the math checked out. Fix: reduced `scale` from
 fits with comfortable margin on all sides at both the `xl` two-column
 layout (narrowest aspect ratio, worst case) and the stacked mobile layout
 (checked via the injected-iframe technique).
+
+**Hero background vs page background mismatch (both themes)**: Khalid
+reported the hero read as a different background colour from the rest of
+the page, in light AND dark. Rather than guess at hex values, measured the
+real thing: fetched `herobg.png`, decoded it with `createImageBitmap`, drew
+it into a 2D canvas (once raw, once with `ctx.filter` set to the exact CSS
+filter chain light mode uses — canvas 2D accepts the same filter syntax, so
+the readback is what the browser actually paints) and sampled pixels. That
+gave three findings:
+
+1. **Dark mode's field colour was never wrong** — the image's dominant
+   colour is exactly `rgb(5,8,22)` = `#050816` = `--color-primary`. What
+   looked like a colour mismatch was the *art*: the image is ~50% faint
+   violet line work, so its average tone sits a touch lighter than the
+   flat page colour, and it was cut off dead straight at the hero's bottom
+   edge. Confirmed by injecting `background-image: none` into the live page
+   — the seam vanished. Fixed by giving dark mode the same masked
+   `::before` layer light mode already had (fades out by 75% of the hero's
+   height) instead of painting the image on the element's own background.
+   It had to move to `::before` because a `background-image` on the element
+   itself can't be masked without also masking the hero's content.
+2. **Light mode's field colour genuinely was wrong**: inverting `#050816`
+   and rotating it 180deg lands on `#f5f6f6`, a *cool* near-white, against
+   the page's *warm* `#f7f5f1`. Grid-searched `sepia`/`brightness`/
+   `contrast` combinations against the measured target and landed on
+   `invert(1) hue-rotate(180deg) saturate(1.3) sepia(0.15) contrast(0.93)`
+   → `#f6f5f2`, within ~1/255 per channel of `--color-primary`, with the
+   line art still comfortably violet (checked by running sample art pixels
+   through both the old and new chains).
+3. **The hero's opaque background was hiding the global ambient layers.**
+   Every other section shows the viewport-fixed `.page-depth::before` wash
+   through it; the hero's opaque base blocked it, so the two never quite
+   matched even with the colours right. Fixed by making `.bg-hero-pattern`
+   transparent — but only in light mode. Dark mode keeps an opaque base on
+   purpose: that's the mechanism that keeps the global starfield out of the
+   hero (Khalid asked for stars everywhere *except* the hero), and dark
+   mode has no wash to block anyway (`.dark .page-depth::before` is
+   `content: none`), so nothing is lost.
+
+Also dropped the now-dead `bg-cover bg-no-repeat bg-center` classes from
+the hero wrapper in `App.jsx` — the element no longer carries a background
+image, those live on `::before` now. Verified both themes at the boundary
+with pixel-region zoom screenshots: no step in either.
