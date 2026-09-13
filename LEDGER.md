@@ -337,3 +337,25 @@ Also dropped the now-dead `bg-cover bg-no-repeat bg-center` classes from
 the hero wrapper in `App.jsx` — the element no longer carries a background
 image, those live on `::before` now. Verified both themes at the boundary
 with pixel-region zoom screenshots: no step in either.
+
+**Hero scroll indicator overlapping the 3D desk**: Khalid asked to move
+the scroll-down indicator "down a tiny bit" so it stops overlapping the
+computer. Moving alone couldn't fix it: the desk occupies the bottom of
+the hero and leaves a clear band of only ~7% of the hero's height (~57px
+on an 847px-tall viewport), while the indicator needed 104px (64px tall
+plus a 40px `bottom-10` offset). So it also had to shrink to fit the band:
+`w-[35px] h-[64px]` → `w-[26px] h-[36px]`, `border-4` → `border-[3px]`,
+dot `w-3 h-3` → `w-1.5 h-1.5`, travel `[0,24,0]` → `[0,12,0]`, offset
+`xs:bottom-10` → `xs:bottom-2`. Total footprint 44px, which still clears
+the desk on viewports down to roughly 650px tall. Mobile's `bottom-32`
+was left alone (the model sits differently there and it wasn't colliding).
+
+Tooling note for future sessions: the `computer` tool's `zoom` action
+changes Chrome's **page zoom**, and Chrome persists zoom per origin — so
+after using it once on `localhost:5173`, every later screenshot of that
+origin came back cropped/rescaled (dpr 2, viewport reported as 960x423
+instead of 1920x847), which made visual measurement useless and cost a lot
+of back-and-forth. Two things that fixed it: prefer plain `screenshot`
+over `zoom`, and if the zoom is already stuck, serve the dev server on a
+different origin (`npm run dev -- --host 127.0.0.1`, then browse
+`http://127.0.0.1:5173`) to get a fresh origin at 100% zoom.

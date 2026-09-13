@@ -58,19 +58,24 @@ const Hero = () => {
         </Suspense>
       </div>
 
-      <div className="absolute xs:bottom-10 bottom-32 w-full flex justify-center items-center">
+      {/* Sits in the narrow band the 3D desk leaves clear at the very bottom of
+          the hero (~7% of the hero's height), so it reads as its own element
+          instead of floating on top of the keyboard. That band is what caps the
+          indicator's size — it has to stay shorter than the clearance, or it
+          overlaps the desk again on shorter viewports. */}
+      <div className="absolute xs:bottom-2 bottom-32 w-full flex justify-center items-center">
         <a href="#about">
-          <div className="w-[35px] h-[64px] rounded-3xl border-4 border-secondary flex justify-center items-start p-2">
+          <div className="w-[26px] h-[36px] rounded-3xl border-[3px] border-secondary flex justify-center items-start p-1">
             <motion.div
             animate={{
-              y: [0, 24, 0]
+              y: [0, 12, 0]
             }}
             transition={{
               duration: 1.5,
               repeat: Infinity,
               repeatType: 'loop'
             }}
-            className="w-3 h-3 rounded-full bg-secondary mb-1"
+            className="w-1.5 h-1.5 rounded-full bg-secondary mb-1"
             />
           </div>
         </a>
