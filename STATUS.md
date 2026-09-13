@@ -138,6 +138,18 @@ Known gaps:
     though it fit vertically. Reduced `Earth.jsx`'s `scale` from `2.5` to
     `1.8`; fits with margin now at both the `xl` two-column layout and
     the stacked mobile layout.
+14. Hero background no longer mismatches the page in either theme. Two
+    separate causes, both measured rather than eyeballed (decoded the PNG
+    into a canvas and read the pixels back): (a) light mode's inverted
+    field landed on a COOL `#f5f6f6` against the page's warm `#f7f5f1`,
+    fixed by adding `sepia(0.15)` to the filter chain; (b) the starfield
+    art cut off at the hero's bottom as a hard seam in dark mode, fixed by
+    moving the dark-mode image onto the same masked `::before` layer light
+    mode already used. The hero is also transparent now in light mode so
+    the viewport-fixed ambient wash runs continuously through it; dark
+    mode keeps an opaque base (that's what keeps the starfield out of the
+    hero, as requested) and needs no wash-matching since its image field
+    is exactly `--color-primary`.
 
 ## Git state
 

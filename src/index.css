@@ -59,13 +59,19 @@ body {
 }
 
 /*
- * Hero background. Dark mode: the shipped herobg.png at full richness, unchanged.
- * Light mode reuses the SAME image rather than a flat gradient: a ::before layer
- * carries it through invert()+hue-rotate(180deg), which flips the dark-navy field
- * to near-white and re-lands the violet line art back in the violet family (the
- * source art is already blue-violet, so a 180deg rotation after inversion keeps
- * it on-brand instead of drifting to an unrelated hue). A ::after scrim keeps the
- * hero heading readable over the busier top-left area of the pattern.
+ * Hero background. BOTH themes now paint the same structure, so the hero can
+ * never read as a differently-toned "zone" from the rest of the page:
+ *   - the element's own background is exactly rgb(var(--color-primary)),
+ *   - the herobg.png starfield rides on ::before as a decorative layer that
+ *     fades out before the hero's bottom edge (so it dissolves into the page
+ *     colour instead of cutting off at a hard horizontal edge),
+ *   - a ::after scrim (light only) keeps the hero heading readable over the
+ *     busier top-left area of the pattern.
+ * Light mode additionally runs the image through invert()+hue-rotate(180deg),
+ * which flips the dark-navy field to near-white and re-lands the violet line
+ * art back in the violet family (the source art is already blue-violet, so a
+ * 180deg rotation after inversion keeps it on-brand instead of drifting to an
+ * unrelated hue).
  */
 .bg-hero-pattern {
   /* isolation:isolate makes this element's OWN background paint as the base layer
@@ -84,11 +90,12 @@ body {
      escape to the page's root stacking context anymore. */
   position: relative;
   isolation: isolate;
-  /* Flat and identical to the page's own primary color — the hero is no
-     longer a visually distinct "zone" with its own tone. The starfield
-     image (::before below) and its scrim (::after) still layer on top of
-     this exactly as before; only the plain base color underneath changed. */
-  background-color: rgb(var(--color-primary));
+  /* Transparent, so the hero sits on the exact same stack as every other
+     section: the page wrapper's own bg-primary plus the viewport-fixed
+     ambient wash (.page-depth::before). An opaque background here would
+     block that wash and make the hero read as a differently-toned zone
+     against everything below it. Dark mode overrides this — see below. */
+  background-color: transparent;
 }
 
 .bg-hero-pattern::before,
@@ -105,17 +112,25 @@ body {
   background-size: cover;
   background-position: center;
   background-repeat: no-repeat;
-  filter: invert(1) hue-rotate(180deg) saturate(1.3) brightness(1.05) contrast(0.93);
-  /* Full opacity: with the paint-order fixed (see the isolation comment above),
-     this now actually sits above the base gradient, so it can carry the same
-     full-strength presence dark gets instead of a diluted blend. */
   opacity: 1;
-  /* Fade the starfield texture out before the hero's bottom edge, instead of
-     letting it cut off abruptly where the next section begins. This is the ONLY
-     thing that should soften it — opacity stays at 1 everywhere above the fade.
-     Fully transparent by 75%, comfortably before .hero-transition's own zone
-     (the last ~170-210px) takes over — no residual line-art texture competes
-     with that dedicated layer's own curve/glow near the very bottom. */
+  /*
+   * Light mode only (dark resets this to none below). The sepia(0.15) is not a
+   * stylistic choice — it is a colour-match correction: inverting the image's
+   * #050816 field and rotating it 180deg lands on #f5f6f6, a COOL near-white,
+   * which read as a visible mismatch against the page's warm #f7f5f1. Adding
+   * sepia(0.15) (and dropping the old brightness(1.05), which was overshooting)
+   * warms the inverted field to #f6f5f2 — within ~1/255 per channel of
+   * --color-primary — while leaving the line art comfortably violet.
+   * Measured against the real decoded PNG, not eyeballed; re-measure with a
+   * canvas + ctx.filter readback if --color-primary ever changes again.
+   */
+  filter: invert(1) hue-rotate(180deg) saturate(1.3) sepia(0.15) contrast(0.93);
+  /* Fade the starfield out before the hero's bottom edge instead of letting it
+     cut off abruptly where the next section begins. Without this the art's
+     average tone (the field plus all that faint line work) sits slightly
+     lighter than the flat page colour below it, so the cut-off reads as a hard
+     horizontal seam — which is exactly what it looked like in dark mode while
+     this layer was disabled there. Fully transparent by 75%. */
   mask-image: linear-gradient(to bottom, black 0%, black 55%, transparent 75%);
   -webkit-mask-image: linear-gradient(to bottom, black 0%, black 55%, transparent 75%);
 }
@@ -130,11 +145,26 @@ body {
   );
 }
 
+/* Dark mode keeps an opaque base, which is what hides the global starfield
+   behind the hero (deliberate: the starfield is wanted everywhere EXCEPT the
+   hero). That costs nothing in tone-matching here, because the source image's
+   own field colour is exactly #050816 — i.e. --color-primary — and dark mode
+   has no ambient wash to block (.dark .page-depth::before is content: none). */
 .dark .bg-hero-pattern {
-  background-image: url("/src/assets/herobg.png");
+  background-color: rgb(var(--color-primary));
 }
 
-.dark .bg-hero-pattern::before,
+/* Dark mode shows the same starfield layer, just un-inverted (the source art is
+   already dark-navy + violet). It deliberately shares ::before with light mode
+   rather than sitting on the element's own background-image like it used to:
+   a background-image on the element itself cannot be masked without also
+   masking the hero's content, and without the mask the art cut off at the
+   hero's bottom edge as a hard seam against the page. */
+.dark .bg-hero-pattern::before {
+  filter: none;
+}
+
+/* No contrast scrim needed in dark — the art is already dark behind light text. */
 .dark .bg-hero-pattern::after {
   content: none;
 }
