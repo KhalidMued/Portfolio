@@ -167,10 +167,14 @@ https://github.com/KhalidMued/Portfolio/pull/7
 
 Khalid's workflow for this repo is one PR per change, squash-merged into
 `main` (every commit on `main` is a `(#N)` squash). So: branch off an
-up-to-date `origin/main`, commit there, push, open a PR — don't commit
-straight to `main`, and don't keep reusing a branch whose PR has already
-been merged (GitHub deletes the branch on merge, and the local copy's
-history goes stale against the squashed commit).
+up-to-date `origin/main` and commit there — don't commit straight to
+`main`, and don't keep reusing a branch whose PR has already been merged
+(GitHub deletes the branch on merge, and the local copy's history goes
+stale against the squashed commit).
+
+**Stop at the commit.** Khalid verifies the change himself first, then
+asks for the PR. Do not run `gh pr create`, and do not push a branch,
+unless he asked for it in that exchange — see CLAUDE.md.
 
 ## Open / not yet addressed
 
