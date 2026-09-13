@@ -153,13 +153,16 @@ Known gaps:
 
 ## Git state
 
-All of this session's work is committed and pushed as PR #7
-(`redesign/dev-security-two-sides` → `main`):
-https://github.com/KhalidMued/Portfolio/pull/7 — not yet merged. Further
-changes in this session continue on that same branch; commit and push
-them there rather than starting a new branch, unless Khalid says
-otherwise. Merge only when Khalid says he's ready (content sign-off is
-still pending, see below).
+The main redesign shipped as PR #7
+(`redesign/dev-security-two-sides` → `main`), squash-merged as `3abded2`:
+https://github.com/KhalidMued/Portfolio/pull/7
+
+Khalid's workflow for this repo is one PR per change, squash-merged into
+`main` (every commit on `main` is a `(#N)` squash). So: branch off an
+up-to-date `origin/main`, commit there, push, open a PR — don't commit
+straight to `main`, and don't keep reusing a branch whose PR has already
+been merged (GitHub deletes the branch on merge, and the local copy's
+history goes stale against the squashed commit).
 
 ## Open / not yet addressed
 
