@@ -139,6 +139,16 @@ Known gaps:
     `1.8`; fits with margin now at both the `xl` two-column layout and
     the stacked mobile layout.
 
+## Git state
+
+All of this session's work is committed and pushed as PR #7
+(`redesign/dev-security-two-sides` → `main`):
+https://github.com/KhalidMued/Portfolio/pull/7 — not yet merged. Further
+changes in this session continue on that same branch; commit and push
+them there rather than starting a new branch, unless Khalid says
+otherwise. Merge only when Khalid says he's ready (content sign-off is
+still pending, see below).
+
 ## Open / not yet addressed
 
 - Broader "too purply" feedback — only addressed in the About section so
