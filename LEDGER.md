@@ -1065,3 +1065,49 @@ harness — clicking the tab buttons in a backgrounded iframe does nothing,
 because React 18's scheduler is throttled along with rAF. The other three
 groups' labels were checked by measuring them through a probe span
 carrying the badge's computed font and column width instead.
+
+**Projects section: cover art was being cropped at every breakpoint.**
+Khalid: *"some of the drawing are pushed to on side and some titles for
+these cards are pushed to certain side and not appearing fully"*.
+
+One root cause for both symptoms. `Frame` in `ProjectCovers.jsx` rendered
+every cover with `preserveAspectRatio="xMidYMid slice"` — which scales the
+art to *cover* the box and crops whatever doesn't fit — while `Works.jsx`
+gave it a fixed `h-[220px]` box whose width came from the layout. The box
+was therefore a different shape from the 400x230 viewBox at every width,
+and `slice` quietly ate the difference:
+
+| Width | Cover box | Art drawn at | Cropped |
+| --- | --- | --- | --- |
+| 390 | 285x220 | 383x220 | **98px horizontally** (49 each side) |
+| 1280 | 482x220 | 482x277 | **57px vertically** (28 each side) |
+
+A quarter of the artwork's width was gone on a phone. That is both
+complaints in one: the diagrams looked shoved sideways, and the labels
+*inside* them — `ArchitectureCover`'s "UI" / "API" / "Agent" / "Data"
+boxes sit at x=30 and x=300, `IncidentCover`'s caption, `ZtnaCover`'s
+chain labels — were sliced through, which is the "titles not appearing
+fully". The card's own `<h3>` was measured and never overflowed; the
+titles he meant are drawn inside the SVG.
+
+Fixed on both sides of the contract: `Frame` now uses `meet`, and the
+card's cover box is `aspect-[400/230]` instead of a fixed height, so the
+box always matches the viewBox and `meet` fits exactly — no crop and no
+letterboxing either. Commented in both files that the ratio is duplicated
+and must move together.
+
+Verified across 360 / 390 / 430 / 768 / 1280: the box measures a 1.739
+ratio at every one, drawn size equals box size exactly (letterbox 0x0),
+and the count of SVG elements extending outside the section went 3 -> 0.
+
+All six covers share that one `Frame`, so this fixes both tabs at once —
+which matters because React state can't be driven from this harness, so
+the Network & Security tab couldn't be opened to look at. Checked
+statically instead: every literal coordinate in all six covers sits
+inside the 400x230 viewBox, so nothing is clipped by the viewBox itself.
+
+Also, while in there: the card title is now `text-[19px] sm:text-[22px]`
+with `leading-tight` and `break-words`, and the text column got `min-w-0`
+— a flex child defaults to `min-width:auto` and won't shrink below its
+content, which is how a long unbroken name would have forced the column
+wider than its share.
