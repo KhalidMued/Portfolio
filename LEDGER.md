@@ -596,3 +596,76 @@ origin/fix/hero-scroll-indicator-hitbox main` was empty, proving the
 squash captured everything. One commit on `fix/hero-scroll-indicator`
 read `+` as well (the CLAUDE.md no-unasked-PRs instruction); confirmed
 present in `main:CLAUDE.md` before deleting.
+
+**Contact form was dead; replaced EmailJS with a Cloudflare Worker +
+Resend.** Khalid: *"lets find why the contact form is not working also if
+there is a better tech way to do it the emailjs i'm open for it"*, and he
+reported an error toast on submit.
+
+Diagnosis, by probing the EmailJS REST API from the page with one
+credential swapped out at a time — each of those fails validation before
+anything is delivered, so nothing was sent:
+
+| Probe | Result |
+| --- | --- |
+| real key + real service + bogus template | `400 The template ID not found` |
+| real key + bogus service + real template | `400 The service ID not found` |
+| bogus key + real service + real template | `400 The Public Key is invalid` |
+
+The bogus-template case getting *past* the key and service checks proved
+both were valid, so the credentials in the bundle were fine. With his
+go-ahead, one real send gave the actual answer:
+
+    HTTP 412 — Gmail_API: Invalid grant. Please reconnect your Gmail account
+
+The EmailJS service's Gmail OAuth refresh token had been revoked. Nothing
+in the repo was wrong. Reconnecting Gmail in the dashboard would have
+fixed it for a while and then broken again the same way, which is why he
+chose to move off it.
+
+**What replaced it** (`worker/index.js`, wired up in `wrangler.jsonc`):
+`POST /api/contact` on the site's own origin. The Resend API key is a
+Worker secret, so nothing about mail delivery is in the client bundle any
+more. The Worker re-validates every field (the form's `maxLength` values
+are a suggestion, not a limit), caps the body at 16 kB, checks the
+honeypot, rate-limits per IP, and returns a generic message on failure
+while logging the real upstream error server-side.
+
+Config details worth remembering:
+
+- `not_found_handling: "single-page-application"` would have answered
+  `/api/contact` with `index.html` and the Worker would never have run.
+  `assets.run_worker_first: ["/api/*"]` is what routes API paths to the
+  Worker while page requests still go straight to the asset server.
+- The rate limiter's `namespace_id` is a per-Worker label, not an account
+  resource — there's nothing to create in the dashboard for it.
+- The honeypot is *sent* to the Worker rather than short-circuited in the
+  browser, so the decision lives in the one place a visitor can't edit.
+  A flagged submission gets a plain `200` and no mail, so a bot learns
+  nothing from the response.
+- `CONTACT_TO_EMAIL` had to change from the old `khalid.mued@gmail.com` to
+  `khalidmueddev@gmail.com`: Resend only delivers to the address its own
+  account is registered under until a sending domain is verified. Khalid
+  had previously said to leave the old address alone, so this is a
+  deliberate reversal with a reason, not a re-fix of settled ground.
+
+Verified against `wrangler dev` on `:8787` (which serves the built site
+and the Worker together, so it's the closest thing to production):
+`wrangler deploy --dry-run` shows all four bindings resolving; wrong
+method → 405; empty / partial / non-JSON / array bodies → 400; bad email
+→ 400; over-length field → 400; 20 kB body → 413; honeypot filled → 200
+with no Resend call (confirmed against the request log); sixth request in
+a minute → 429. A valid submission with a deliberately dummy key returns
+`502 {"error":"Something went wrong. Please try again."}` to the client
+while the log holds the real `401 API key is invalid` — exactly the split
+that was wanted. Driven through the actual form in the browser too: the
+Worker's message reached the toast and the button reset.
+
+Not verified: a successful send. That needs a real Resend key, which only
+Khalid can create. `npx eslint src worker --ext js,jsx` clean,
+`npm run build` green.
+
+Also found along the way: **`khalidmued.com` has no DNS records** — the
+zone exists but the apex has no A/AAAA/CNAME and `www` doesn't exist, so
+the `canonical` and `og:url` in `index.html` point at a host that doesn't
+resolve. Left alone, recorded in STATUS.md.

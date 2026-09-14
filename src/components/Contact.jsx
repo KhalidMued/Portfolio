@@ -1,6 +1,5 @@
 import { useState, useRef, Suspense } from 'react';
 import { motion } from 'framer-motion';
-import emailjs from '@emailjs/browser';
 
 import { styles } from '../styles';
 import { EarthCanvas } from './canvas';
@@ -28,15 +27,17 @@ const Contact = () => {
   setForm({ ...form, [name]: value })
  }
 
- const handleSubmit = (e) => {
+ const handleSubmit = async (e) => {
   e.preventDefault();
 
-  // Honeypot: real visitors never see or fill this field, so any value here
-  // means a bot filled every input it could find — drop the submission
-  // silently, no error shown, no request sent.
-  if (honeypotRef.current?.value) {
-    return;
-  }
+  // Honeypot: real visitors never see or fill this field, so any value in it
+  // means a bot filled every input it could find. The value is sent rather
+  // than short-circuited here, because the Worker is the only place a
+  // decision like this can't be edited out — and a direct POST that skips
+  // this form entirely has to be caught there anyway. The Worker answers a
+  // flagged submission with a plain 200 and sends nothing, so a bot learns
+  // nothing from the response.
+  const contactHp = honeypotRef.current?.value ?? '';
 
   const name = form.name.trim();
   const email = form.email.trim();
@@ -49,32 +50,36 @@ const Contact = () => {
 
   setLoading(true);
 
-  emailjs.send(
-    'service_ptvv27j',
-    'template_7iy3t04',
-    {
-      from_name: name,
-      to_name:'Khalid',
-      from_email: email,
-      to_email:'khalid.mued@gmail.com',
-      message: message,
-    },
-    '2CJVeRwsf_o57mnSM'
-    )
-    .then(() => {
-      setLoading(false);
-      toast.success("Thank you! I'll get back to you soon.");
+  try {
+    // Same-origin: the Worker in worker/index.js holds the mail provider's
+    // key. Nothing about how this site sends mail is visible to the browser.
+    const response = await fetch('/api/contact', {
+      method: 'POST',
+      headers: { 'content-type': 'application/json' },
+      body: JSON.stringify({ name, email, message, contact_hp: contactHp }),
+    });
 
-      setForm({
-        name: '',
-        email: '',
-        message: '',
-      })
-    }, (error) => {
-      setLoading(false);
-      if (import.meta.env.DEV) console.error(error);
-      toast.error("Something went wrong. Please try again.");
-    })
+    let payload = {};
+    try {
+      payload = await response.json();
+    } catch {
+      // A non-JSON body means something upstream answered instead of the
+      // Worker; fall through to the generic message below.
+    }
+
+    if (!response.ok) {
+      toast.error(payload.error || 'Something went wrong. Please try again.');
+      return;
+    }
+
+    toast.success("Thank you! I'll get back to you soon.");
+    setForm({ name: '', email: '', message: '' });
+  } catch (error) {
+    if (import.meta.env.DEV) console.error(error);
+    toast.error('Something went wrong. Please try again.');
+  } finally {
+    setLoading(false);
+  }
  }
 
 

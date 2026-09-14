@@ -22,17 +22,28 @@ color system ties it all together (see `src/constants/categories.js`).
   contact section's earth, and the background starfield
 - `react-icons` (Simple Icons `si` set + Font Awesome 6 `fa6` set) for all
   tech/skill/credential icons — no raster image assets for these anymore
-- EmailJS for the contact form, React Toastify for notifications
+- Contact form posts to `/api/contact`, a Cloudflare Worker
+  (`worker/index.js`) that sends through Resend; React Toastify for
+  notifications
 - Deployed to Cloudflare (Pages/Workers) — see `wrangler.jsonc`
 
 ## Commands
 
 - `npm run dev` — dev server (usually `http://localhost:5173`)
+- `npm run dev:worker` — `wrangler dev` on `:8787`, serving `dist/` **and**
+  the contact Worker. Vite proxies `/api` there, so run it alongside
+  `npm run dev` if you're touching the contact form — or just use `:8787`
+  on its own, which is the closest thing to production.
 - `npm run build` — production build to `dist/`
 - `npm run preview` — serve the production build locally
 - `npm run lint` — ESLint
 
 No test suite exists yet.
+
+The Worker needs `RESEND_API_KEY`. In production it's a Worker secret
+(`npx wrangler secret put RESEND_API_KEY`); locally it goes in `.dev.vars`
+(gitignored — copy `.dev.vars.example`). Without it the endpoint answers
+500 and logs why, rather than failing silently.
 
 ## Architecture notes
 

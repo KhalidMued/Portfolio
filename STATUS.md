@@ -31,10 +31,17 @@ Known gaps:
 - No project GitHub/live links yet. `ProjectCard` in `Works.jsx` supports an
   optional `source_code_Link` (shows a hover GitHub icon only if present) —
   currently omitted for every project. Ask Khalid for links when he's ready.
-- Contact form's `to_email` in `Contact.jsx` is `khalid.mued@gmail.com`,
-  which does NOT match his actual account email
-  (`khalidmueddev@gmail.com`). This was flagged to Khalid explicitly —
-  **he said keep it as is**. Do not "fix" this again without being asked.
+- Contact form destination is now `CONTACT_TO_EMAIL` in `wrangler.jsonc`,
+  set to `khalidmueddev@gmail.com`. This supersedes the old EmailJS
+  `to_email` of `khalid.mued@gmail.com`, which Khalid had previously said
+  to leave alone — it had to change because Resend only delivers to the
+  address its own account is registered under until a sending domain is
+  verified. If the Resend account is registered under a different address,
+  that var must match it or nothing arrives.
+- **The contact form needs `RESEND_API_KEY` set as a Worker secret before
+  it can send anything.** Everything else is built and tested; this is the
+  one remaining step and only Khalid can do it. See "Open / not yet
+  addressed".
 - Feedbacks/testimonials were intentionally replaced with a "By the Numbers"
   stats section (`Highlights.jsx`) since there were no real testimonials.
   `testimonials` is still exported (empty array) from constants in case real
@@ -254,6 +261,18 @@ unless he asked for it in that exchange — see CLAUDE.md.
 
 ## Open / not yet addressed
 
+- **Contact form: waiting on Khalid for two things.** (1) A Resend API key
+  — sign up at resend.com, create a key, then
+  `npx wrangler secret put RESEND_API_KEY`. (2) Confirmation that the
+  Resend account's registered address matches `CONTACT_TO_EMAIL` in
+  `wrangler.jsonc`. Until the key is set the endpoint returns 500 and logs
+  `RESEND_API_KEY is not set`. Everything else is built and verified.
+- **`khalidmued.com` does not resolve.** The zone exists but the apex has
+  no A/AAAA/CNAME record and `www` doesn't exist at all
+  (`Resolve-DnsName` returns SOA only). `index.html`'s `canonical` and
+  `og:url` both point there, so link previews and SEO currently reference
+  a dead host. Verifying that domain in Resend would also lift the
+  "delivery only to the account's own address" restriction.
 - Broader "too purply" feedback — only addressed in the About section so
   far. Khalid may want more color variety elsewhere (Hero, Navbar, Works,
   etc.) — ask before doing a wider recolor.
