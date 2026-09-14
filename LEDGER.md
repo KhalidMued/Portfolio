@@ -996,3 +996,27 @@ section reported nothing for either, which is the tab being throttled,
 not evidence. Lint clean, build green, and both `amount:"some"` and the
 margin are present in the built bundle. Needs a look on a real phone
 after deploy.
+
+**Experience content edits** (`src/constants/index.js`), at Khalid's
+request:
+
+| Entry | Was | Now |
+| --- | --- | --- |
+| top (Dec 2025 — Present) | Network Security Junior | **SecOps** |
+| middle (Jun 2025 — Dec 2025) | COOP Trainee | **Network Security Junior** |
+| bottom | Apr 2022 — Jun 2025 | **Apr 2019 — Jun 2025** |
+
+The two title changes are a shuffle, not independent renames — the middle
+entry takes the name the top one used to have. Applied top-down so the
+string being matched was unique at each step; a blind find-and-replace on
+"Network Security Junior" would have hit both.
+
+Checked for anything that would now contradict the earlier start date:
+`stats` makes no claim about years of experience, so nothing else needed
+touching.
+
+Verified by rendering at 390px wide and reading the timeline back — the
+three titles and three dates are exactly as above. Note the timeline
+entries are `visibility: hidden` until scrolled into view, so `innerText`
+returns nothing for them; `textContent` is what to query. Lint clean,
+build green.

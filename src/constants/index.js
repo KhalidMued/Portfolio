@@ -240,7 +240,7 @@ const technologyGroups = [
 // ---------------------------------------------------------------------------
 const experiences = [
   {
-    title: "Network Security Junior",
+    title: "SecOps",
     company_name: "Zaid Al-Hussain & Brothers Group",
     location: "Riyadh, Saudi Arabia",
     date: "Dec 2025 — Present",
@@ -255,7 +255,7 @@ const experiences = [
     ],
   },
   {
-    title: "COOP Trainee",
+    title: "Network Security Junior",
     company_name: "Zaid Al-Hussain & Brothers Group",
     location: "Riyadh, Saudi Arabia",
     date: "Jun 2025 — Dec 2025",
@@ -271,7 +271,7 @@ const experiences = [
     title: "IT Technician — Part Time",
     company_name: "Zaid Al-Hussain & Brothers Group",
     location: "Riyadh, Saudi Arabia",
-    date: "Apr 2022 — Jun 2025",
+    date: "Apr 2019 — Jun 2025",
     category: "infra",
     icon: FaGears,
     points: [
