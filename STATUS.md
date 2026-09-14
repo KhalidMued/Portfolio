@@ -14,9 +14,10 @@ feedback while looking at the live site.
 **We are currently paused mid-review**, going section by section through the
 live site for visual/UX feedback. Sections reviewed and fixed so far: Hero,
 About ("Two Sides" block + the 6 service cards), Experience (timeline
-icons). Nothing is known to be broken right now. The next step is whichever
-section Khalid raises next — Skills, Works, Highlights, Contact,
-Credentials, and Navbar haven't had a dedicated feedback pass yet.
+icons), Navbar (logo wrap / responsive breakpoints). Nothing is known to be
+broken right now. The next step is whichever section Khalid raises next —
+Skills, Works, Highlights, Contact and Credentials haven't had a dedicated
+feedback pass yet.
 
 ## Content status
 
@@ -182,6 +183,21 @@ Known gaps:
     come from breaking it): anything painted inside the hero that reaches
     its bottom edge will read as a horizontal line, because the section
     below has no counterpart layer.
+18. Navbar logo wrapped onto two lines ("Khalid|  Developer ×" /
+    "Security") with the pipe glued to "Khalid". The `<p>` was
+    `display:flex` with `&nbsp;`-based spacing, so the separator spacing
+    collapsed and the suffix span wrapped internally whenever the bar ran
+    out of room. Rewritten as three spans with `gap-2` +
+    `whitespace-nowrap`; the "| Developer × Security" suffix now shows
+    only from `lg` (1024px) up, where it measurably fits. Also moved the
+    desktop nav row from `sm:` to `md:` (so the hamburger now covers
+    640–767px) and made the link gap `gap-6 xl:gap-10` — that closes a
+    **pre-existing** overflow band the wrapping had been masking.
+    Measured across 320–1920px: one line everywhere, no overflow
+    anywhere. Tradeoff worth knowing: at Khalid's own ~960px CSS viewport
+    (200% Windows scaling on a 1920px screen) the logo now reads just
+    "Khalid" — forcing the suffix on at that width leaves only 16px
+    between the logo and "About", which is why the cutoff is 1024.
 
 ## Git state
 
@@ -211,6 +227,15 @@ unless he asked for it in that exchange — see CLAUDE.md.
 - No automated tests exist. Verification has been manual, in-browser
   (via the `claude-in-chrome` tools + a local dev server), each time a
   change is made.
+- Browser-tooling note: screenshots come back blank/cropped whenever the
+  Chrome window holding the automation tab isn't the foreground window
+  (`document.visibilityState === "hidden"`). Ask Khalid to bring the
+  `localhost:5173` tab to the front. `javascript_tool` still works on a
+  hidden tab, but **timers are throttled** there — use synchronous
+  measurement (set a size, force reflow by reading `offsetWidth`, then
+  measure), not `setTimeout`. For responsive checks without resizing the
+  window, load the site into a same-origin `<iframe>` and vary its width:
+  media queries evaluate against the iframe's own width.
 
 ## How to resume if this session is lost
 

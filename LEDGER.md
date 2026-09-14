@@ -433,3 +433,51 @@ Verified at the boundary in light mode (hero bottom parked at 400px and
 again at 260px into the viewport — no step on the left) and in dark mode
 (where `::after` is `content: none` anyway). `npx eslint src --ext js,jsx`
 clean, `npm run build` green.
+
+**Navbar logo wrapped onto two lines**: at anything under ~1000px the
+logo rendered as "Khalid|  Developer ×" / "Security" — two lines, with the
+pipe glued straight onto "Khalid" and no gap.
+
+Two causes in the same element. The `<p>` was `display:flex`, holding a
+bare text node (`Khalid &nbsp;`) plus a `<span>` (` | &nbsp; Developer ×
+Security `). Flex made each an anonymous flex item, and flex items have
+their leading/trailing collapsible whitespace trimmed — so the space
+before the `|` disappeared while the `&nbsp;` after it survived, which is
+the lopsided "Khalid|  Developer" spacing. Separately, the span was the
+only thing in the bar that could shrink, so once the logo + five nav links
++ theme toggle stopped fitting, it wrapped internally rather than the bar
+overflowing.
+
+Measured the real widths in the page before changing anything: nav content
+row is `max-w-7xl` (1280px) inside `sm:px-16` (128px of padding), the logo
+`<Link>` is 318px with the full text and 104px without it, and the nav
+links + toggle are 549px at `gap-10` / 485px at `gap-6`.
+
+Fix, in `Navbar.jsx`:
+- Logo is now three spans in a `flex items-center gap-2 whitespace-nowrap`
+  paragraph, so spacing is symmetric and it can never wrap. The pipe got
+  `text-secondary font-normal` so it reads as a separator rather than part
+  of the name.
+- The `| Developer × Security` suffix is `hidden lg:inline` — shown from
+  1024px, where it fits with 80px of clearance.
+- Desktop nav row moved `sm:` → `md:` and the mobile block `sm:hidden` →
+  `md:hidden`, and the link list is now `gap-6 xl:gap-10`. This closes a
+  **pre-existing** overflow band (640–~690px, where the five links simply
+  did not fit) that the wrapping logo had been absorbing.
+
+Verified by loading the site into a same-origin iframe and sweeping its
+width — media queries evaluate against the iframe's width, so this checks
+real breakpoint behaviour without resizing the browser window. Across
+320 / 360 / 420 / 500 / 600 / 640 / 700 / 767 / 768 / 800 / 860 / 900 /
+960 / 1000 / 1024 / 1100 / 1280 / 1440 / 1920: logo is one line at every
+width, no nav overflow and no document overflow at any width, hamburger
+below 768 and the desktop row at/above it, suffix present at/above 1024.
+Also eyeballed in dark mode. `npx eslint src --ext js,jsx` clean,
+`npm run build` green.
+
+One tradeoff to be aware of: Khalid's own browser viewport is ~960 CSS px
+(200% Windows display scaling on a 1920px screen), which is below the
+1024 cutoff — so on *his* screen the logo now reads just "Khalid". Forcing
+the suffix on at 960px was measured too: it fits, but leaves only 16px
+between the logo and the "About" link, which is why the cutoff is 1024
+rather than something lower.
