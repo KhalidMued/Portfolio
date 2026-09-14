@@ -15,10 +15,14 @@
 #   - styles: self + Google Fonts CSS (fonts.googleapis.com) + 'unsafe-inline'
 #     for React/framer-motion style attributes.
 #   - fonts: fonts.gstatic.com (the actual .woff2 files).
-#   - connect: self + EmailJS API (api.emailjs.com) — the only runtime fetch.
+#   - connect: 'self' only. The contact form posts to /api/contact on this same
+#     origin (the Cloudflare Worker in worker/index.js), so no third-party
+#     connect-src entry is needed. This used to allow https://api.emailjs.com
+#     back when the form called EmailJS straight from the browser; that
+#     dependency is gone, and so is the exception.
 #   - img data:/blob: for Vite data-URI assets and three.js texture handling.
 /*
-  Content-Security-Policy: default-src 'self'; script-src 'self' 'sha256-Q0q6g+lWQIIJli6kaOpw+4w3Xpgrl2lA+0TEWy/eejA='; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data: blob:; connect-src 'self' https://api.emailjs.com; worker-src 'self' blob:; object-src 'none'; base-uri 'self'; form-action 'self'; frame-ancestors 'none'; upgrade-insecure-requests
+  Content-Security-Policy: default-src 'self'; script-src 'self' 'sha256-Q0q6g+lWQIIJli6kaOpw+4w3Xpgrl2lA+0TEWy/eejA='; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data: blob:; connect-src 'self'; worker-src 'self' blob:; object-src 'none'; base-uri 'self'; form-action 'self'; frame-ancestors 'none'; upgrade-insecure-requests
   X-Content-Type-Options: nosniff
   X-Frame-Options: DENY
   Referrer-Policy: strict-origin-when-cross-origin
