@@ -106,6 +106,19 @@ The Worker needs `RESEND_API_KEY`. In production it's a Worker secret
   margin-left:-12px`-style hack). Do NOT wrap the icon in a flex-centering
   `<div>` — that double-centers it and pushes it toward the edge of the
   circle. Pass the icon element directly (see `Experience.jsx`).
+- **Framer Motion gotcha — `viewport.amount` and tall sections**:
+  `SectionWrapper` triggers every section's entrance with
+  `whileInView`. Its `viewport.amount` must stay `"some"` (threshold 0)
+  and never go back to a fraction like `0.25`. `amount` is a fraction of
+  **the element's own height**, so `0.25` means "a quarter of this
+  section must be on screen at once" — unsatisfiable the moment a section
+  exceeds four viewport heights. On a phone the About section stacks to
+  ~3585px, needing 896px visible against a usable Safari viewport of
+  ~750px, so the observer never fired and the entire section stayed at
+  its `hidden` variant: a screen and a half of blank space between Hero
+  and Experience on every iPhone, while desktop looked perfect. If the
+  entrance timing needs tuning, change the `margin` (rootMargin), never
+  `amount`.
 - **Framer Motion gotcha**: a child `motion.div` using
   `variants={fadeIn(...)}` only animates in correctly if its animation
   state actually propagates from an ancestor using **string**
