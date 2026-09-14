@@ -29,10 +29,11 @@
   },
 
   "vars": {
-    // Where contact-form messages land. NOTE: this is khalidmueddev@gmail.com,
-    // not the khalid.mued@gmail.com the old EmailJS template used — Resend only
-    // delivers to the address the Resend account itself is registered under
-    // until a sending domain is verified, so it has to match that account.
+    // Where contact-form messages land. This MUST stay the address the Resend
+    // account is registered under (khalidmueddev@gmail.com) for as long as the
+    // shared onboarding@resend.dev sender below is in use — Resend rejects any
+    // other recipient with a 403. Verifying a real sending domain lifts that
+    // restriction and frees this to be anything.
     "CONTACT_TO_EMAIL": "khalidmueddev@gmail.com",
     // Resend's shared sender, which works with no DNS setup. Swap this for
     // something like "Portfolio <hello@khalidmued.com>" once that domain is

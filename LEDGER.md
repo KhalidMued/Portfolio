@@ -669,3 +669,36 @@ Also found along the way: **`khalidmued.com` has no DNS records** — the
 zone exists but the apex has no A/AAAA/CNAME and `www` doesn't exist, so
 the `canonical` and `og:url` in `index.html` point at a host that doesn't
 resolve. Left alone, recorded in STATUS.md.
+
+
+**Contact form destination: `khalidmueddev@gmail.com`**, and
+`RESEND_API_KEY` is set as a Worker secret (Khalid set it; it is not in
+the repo). The destination has to be the address the Resend account
+itself is registered under for as long as the shared
+`onboarding@resend.dev` sender is in use — Resend rejects any other
+recipient with a 403. Khalid first asked for `khalid.mued@gmail.com` (the
+old EmailJS destination), then mentioned the Resend account is registered
+under `khalidmueddev@gmail.com`, which made the first choice
+undeliverable; given the options he chose to point the endpoint at the
+Resend address. Verifying a sending domain in Resend is what would free
+this to be any address.
+
+Worth noting these are genuinely two mailboxes: Gmail ignores dots, so
+`khalid.mued@gmail.com` is the same inbox as `khalidmued@gmail.com`, but
+the `dev` suffix makes the Resend account a separate account.
+
+**End-to-end verified with a real key.** Khalid put his Resend key in a
+local `.dev.vars` and two real sends went through `wrangler dev`: a direct
+POST to `/api/contact` returned `200 {"ok":true}` with a clean log, and a
+submission driven through the actual form UI produced the success toast,
+reset the button and cleared all three fields. That closes the one path
+that had never been exercised.
+
+Two operational notes from that session. First, `.dev.vars` must be
+`RESEND_API_KEY=re_...` — it was saved as the bare key with no variable
+name, which wrangler treats as a variable named after the key with an
+empty value. Second, and the reason that key needs rotating: an
+inspection command written to print only the variable name and the
+value's length printed the whole line instead, precisely because the file
+had no `=` in it. Don't `cat`, `awk` or `grep` a secrets file on the
+assumption it is well-formed — check its shape first, or don't read it.
