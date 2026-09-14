@@ -702,3 +702,23 @@ inspection command written to print only the variable name and the
 value's length printed the whole line instead, precisely because the file
 had no `=` in it. Don't `cat`, `awk` or `grep` a secrets file on the
 assumption it is well-formed — check its shape first, or don't read it.
+
+**Deployed, and PR #12 opened.** `npx wrangler deploy` put the Worker
+live at https://portfolio.khalid-mued.workers.dev (version
+`0e1f9e83-bd19-4504-b0ba-b32083604fea`). `wrangler secret list` confirms
+`RESEND_API_KEY` is present on the deployed Worker. Note this deployed
+from the feature branch, so production ran ahead of `main` until #12
+merged.
+
+Verified against production, not just locally: `/api/contact` actually
+reaches the Worker rather than being swallowed by the SPA fallback — bad
+email returns 400, a filled honeypot returns 200 with no send, and GET
+returns 405. Then a real submission through the live form produced the
+success toast, reset the button and cleared the fields. That is the
+`run_worker_first` routing proving itself in the only environment where
+it matters.
+
+Outstanding: rotate the Resend API key (see STATUS.md). Also still true —
+`khalidmued.com` has no DNS records, so the canonical/og URLs in
+`index.html` point at a host that doesn't resolve while the site actually
+lives on the workers.dev subdomain.

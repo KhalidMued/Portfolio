@@ -25,7 +25,10 @@ color system ties it all together (see `src/constants/categories.js`).
 - Contact form posts to `/api/contact`, a Cloudflare Worker
   (`worker/index.js`) that sends through Resend; React Toastify for
   notifications
-- Deployed to Cloudflare (Pages/Workers) — see `wrangler.jsonc`
+- Deployed to Cloudflare Workers at
+  **https://portfolio.khalid-mued.workers.dev** via bare
+  `npx wrangler deploy` — see `wrangler.jsonc`. (`khalidmued.com`, the
+  domain in `index.html`'s canonical tag, does not resolve yet.)
 
 ## Commands
 

@@ -235,6 +235,12 @@ https://github.com/KhalidMued/Portfolio/pull/10 — working tree clean, no
 local branch ahead of `origin/main`. The main redesign before that was
 PR #7, squashed as `3abded2`.
 
+**Deployment**: the site runs on Cloudflare Workers at
+https://portfolio.khalid-mued.workers.dev, deployed with a bare
+`npx wrangler deploy` (no flags — `wrangler.jsonc` carries everything).
+The contact Worker went live from the `feat/contact-worker-resend` branch
+before PR #12 merged, so production may be ahead of `main` until it does.
+
 Khalid's workflow for this repo is one PR per change, squash-merged into
 `main` (every commit on `main` is a `(#N)` squash). So: branch off an
 up-to-date `origin/main` and commit there — don't commit straight to
@@ -262,12 +268,15 @@ unless he asked for it in that exchange — see CLAUDE.md.
 
 ## Open / not yet addressed
 
-- **Contact form: built, and every path except a successful send is
-  verified.** `RESEND_API_KEY` is set as a Worker secret and
-  `CONTACT_TO_EMAIL` is `khalid.mued@gmail.com`. What has never been
-  exercised is one real delivery — that needs either the key in a local
-  `.dev.vars` (Khalid writes that file; the key must not pass through the
-  session) or a deploy. Do that before calling the form done.
+- **Contact form is live and fully verified**, locally and in production
+  (see the deployment note under "Git state"). Nothing outstanding on it
+  except the key rotation below.
+- **Rotate `RESEND_API_KEY`.** The key was printed into a session
+  transcript: `.dev.vars` had been saved as the bare key with no
+  `RESEND_API_KEY=` prefix, and an inspection command meant to show only
+  the variable name and value length printed the whole line instead.
+  Rotate in the Resend dashboard, update `.dev.vars`, re-run
+  `npx wrangler secret put RESEND_API_KEY`, and redeploy. No code change.
 - **`khalidmued.com` does not resolve.** The zone exists but the apex has
   no A/AAAA/CNAME record and `www` doesn't exist at all
   (`Resolve-DnsName` returns SOA only). `index.html`'s `canonical` and
