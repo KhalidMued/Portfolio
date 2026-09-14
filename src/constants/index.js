@@ -67,7 +67,7 @@ export const navLinks = [
 // Hero
 // ---------------------------------------------------------------------------
 export const heroContent = {
-  name: "Khalid Mohamed",
+  name: "Khalid Mudathir",
   roles: ["Developer.", "Network & Security Engineer."],
   tagline: "I build the apps people use — and the infrastructure they depend on.",
   rotating: [

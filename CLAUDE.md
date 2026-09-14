@@ -4,7 +4,7 @@ Guidance for Claude Code when working in this repository.
 
 ## Project
 
-Khalid Mohamed's personal portfolio — a single-page React app positioned around:
+Khalid Mudathir's personal portfolio — a single-page React app positioned around:
 
 > **I build the apps people use — and understand everything it runs on.**
 
