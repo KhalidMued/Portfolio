@@ -454,3 +454,52 @@ body {
       -2.6em 0em 0 0em rgba(255, 255, 255, 0.7), -1.8em -1.8em 0 0em #ffffff;
   }
 }
+/*
+ * react-vertical-timeline-component's entrance animation, retuned for the
+ * one-column layout it uses below 1170px.
+ *
+ * Its own keyframes (`cd-bounce-2-inverse`) start each card at
+ * `translateX(100px)` and overshoot back to `-20px` before settling. In the
+ * one-column layout the card is already full width, so that opening 100px
+ * pushes it past the right edge of the viewport: the document gets wider for
+ * the length of the animation, a horizontal scrollbar flashes, and the whole
+ * page jerks sideways with a strip of background showing on the right. The
+ * -20px overshoot is what makes it feel abrupt rather than smooth.
+ *
+ * Replaced with a fade and a small lift, which never leaves the element's own
+ * layout box and so cannot affect the document's width. Four classes of
+ * specificity against the library's three, so this wins regardless of which
+ * stylesheet Vite emits first.
+ *
+ * Deliberately scoped to the same max-width the library uses for one-column:
+ * the two-column desktop entrance is untouched. It translates horizontally
+ * too, so it carries the same latent overflow — but it has margins either side
+ * to absorb it, and nobody has reported it.
+ */
+@media only screen and (max-width: 1169px) {
+  .vertical-timeline.vertical-timeline--animate
+    .vertical-timeline-element-content.bounce-in {
+    animation: timeline-card-in 0.45s ease-out both;
+  }
+}
+
+@keyframes timeline-card-in {
+  from {
+    opacity: 0;
+    transform: translateY(14px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Respect the OS-level preference: no movement, just the fade. */
+@media (prefers-reduced-motion: reduce) {
+  .vertical-timeline.vertical-timeline--animate
+    .vertical-timeline-element-content.bounce-in,
+  .vertical-timeline.vertical-timeline--animate
+    .vertical-timeline-element-icon.bounce-in {
+    animation: none;
+  }
+}

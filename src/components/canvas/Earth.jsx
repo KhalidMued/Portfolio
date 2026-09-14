@@ -12,13 +12,21 @@ import CanvasLoader from '../Loader';
  * what 1.8 was tuned against after 2.5 clipped there.
  *
  * The phone layout is the opposite shape: ~327x350, nearly square, with about
- * 1.5x the horizontal room. 1.8 there leaves a visible ring of dead space, so
- * phones get a larger scale. Keyed on the CANVAS width rather than the window:
+ * 1.5x the horizontal room. Keyed on the CANVAS width rather than the window's:
  * ~327 on a phone, but 625 at `md` and 589 at `xl`, so a 480 cut separates the
  * phone layout cleanly while leaving every larger layout on the tuned 1.8.
+ *
+ * The phone number is derived, not eyeballed. The model's bounding box, read
+ * out of the glTF accessors, is 1.858 x 1.880 x 1.805 — call it 1.88 world
+ * units per unit of scale. Camera distance is 7.81 and the fov is 45°, so the
+ * visible height is 6.47 units and the visible width is that times the aspect.
+ * At `xl` the globe fills 82% of the limiting dimension, and that is the look
+ * to match. 2.8 puts phones at 91% / 87% / 81% across 360 / 390 / 430 widths.
+ * (An earlier 2.3 came from an over-cautious upper bound for the extent and
+ * filled only 67-75%, which read as too small.)
  */
 const PHONE_CANVAS_MAX = 480;
-const SCALE_PHONE = 2.3;
+const SCALE_PHONE = 2.8;
 const SCALE_DEFAULT = 1.8;
 
 const Earth = () => {
