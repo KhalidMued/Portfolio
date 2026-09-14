@@ -1249,3 +1249,29 @@ matches our selector, and reading the CSSRule back gives
 be checked is the animation actually running — a backgrounded tab reports
 `animationName: none` for *every* element, the library's own rules
 included, so that is the harness and not the CSS.
+
+**SecOps now carries both Security and Infra badges.** Khalid asked for
+an infra tag on it.
+
+The card only ever supported one badge: `category` was a single string,
+read in two places in `Experience.jsx` — once for the badge's colour,
+once for its label — and nowhere else in the codebase. Rather than bolt a
+second field alongside it, all three entries moved to
+`categories: [...]` and the card maps over the list. One consistent
+shape, and a role that genuinely spans two sides can say so.
+
+| Role | Badges |
+| --- | --- |
+| SecOps | Security + **Infra** |
+| Network Security Junior | Security |
+| IT Technician — Part Time | Infra |
+
+Each badge now carries its own accent from `CATEGORY` rather than the
+card having a single colour — which lint caught immediately, since the
+old `color` const became unused the moment the badge started deriving its
+own.
+
+Verified at 390 and 1280 by reading the rendered badges and their
+computed colours back: SecOps shows `Security rgb(0,206,168)` and
+`Infra rgb(245,166,35)`, the other two are unchanged, and neither width
+overflows horizontally.

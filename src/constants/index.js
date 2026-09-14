@@ -244,7 +244,7 @@ const experiences = [
     company_name: "Zaid Al-Hussain & Brothers Group",
     location: "Riyadh, Saudi Arabia",
     date: "Dec 2025 — Present",
-    category: "security",
+    categories: ["security", "infra"],
     icon: FaShieldHalved,
     points: [
       "Analyze security alerts, system logs, and network events to investigate potential incidents and operational issues.",
@@ -259,7 +259,7 @@ const experiences = [
     company_name: "Zaid Al-Hussain & Brothers Group",
     location: "Riyadh, Saudi Arabia",
     date: "Jun 2025 — Dec 2025",
-    category: "security",
+    categories: ["security"],
     icon: FaNetworkWired,
     points: [
       "Monitored enterprise network security using firewall infrastructure, Sophos Central, and Graylog.",
@@ -272,7 +272,7 @@ const experiences = [
     company_name: "Zaid Al-Hussain & Brothers Group",
     location: "Riyadh, Saudi Arabia",
     date: "Apr 2019 — Jun 2025",
-    category: "infra",
+    categories: ["infra"],
     icon: FaGears,
     points: [
       "Provided day-to-day technical support, system installation, troubleshooting, and end-user assistance.",

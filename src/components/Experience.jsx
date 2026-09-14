@@ -12,7 +12,10 @@ import { useTheme } from '../context/ThemeContext';
 const ExperienceCard = ( {experience} ) => {
   const { theme } = useTheme();
   const isDark = theme === 'dark';
-  const color = CATEGORY[experience.category].color;
+  // A role can span more than one side of the work — SecOps is security and
+  // infrastructure both — so this is a list, and each badge carries its own
+  // accent colour rather than the card having a single one.
+  const categories = experience.categories;
   const Icon = experience.icon;
 
   return (
@@ -34,12 +37,20 @@ const ExperienceCard = ( {experience} ) => {
          style={{margin: 0}}
          > {experience.company_name} · {experience.location} </p>
       </div>
-      <span
-        className="text-[11px] font-bold uppercase tracking-wider px-3 py-1 rounded-full shrink-0"
-        style={{ backgroundColor: `${color}1a`, color }}
-      >
-        {CATEGORY[experience.category].short}
-      </span>
+      <div className="flex flex-wrap gap-2 shrink-0">
+        {categories.map((key) => (
+          <span
+            key={key}
+            className="text-[11px] font-bold uppercase tracking-wider px-3 py-1 rounded-full"
+            style={{
+              backgroundColor: `${CATEGORY[key].color}1a`,
+              color: CATEGORY[key].color,
+            }}
+          >
+            {CATEGORY[key].short}
+          </span>
+        ))}
+      </div>
     </div>
 
     <ul className="mt-5 list-disc ml-5 space-y-2">
