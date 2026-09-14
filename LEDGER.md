@@ -1186,3 +1186,66 @@ gate already separates phones from `md` upward, so 768 and 1280 keep
 Not visually verified, same reason as the globe — the canvas never
 renders in this backgrounded browser. If 0.6 is now too small, 0.65 is
 the next step; the constants are named at the top of the file.
+
+**Globe enlarged again, this time from a measurement.** 2.3 still read as
+too small. The previous number came from an upper bound for the model's
+size, inferred from "1.8 fits the xl column" — which was too cautious,
+because 1.8 doesn't fill that column, it fills 82% of it.
+
+Measured the model properly instead: parsed `public/planet/scene.gltf`,
+walked the node hierarchy applying each node's TRS, and read the POSITION
+accessors' `min`/`max` (glTF stores a bounding box per accessor). Result:
+**1.858 x 1.880 x 1.805**, so ~1.88 world units per unit of scale — not
+the 2.284 that had been assumed.
+
+With camera distance 7.81 and fov 45°, visible height is 6.47 units and
+visible width is that times the aspect:
+
+| Layout | Limiting extent | 1.8 | 2.3 | 2.8 | 3.0 |
+| --- | --- | --- | --- | --- | --- |
+| 360 phone | 5.77 | 59% | 75% | **91%** | 98% |
+| 390 phone | 6.05 | 56% | 72% | **87%** | 93% |
+| 430 phone | 6.47 | 52% | 67% | **81%** | 87% |
+| xl desktop | 4.11 | **82%** | — | — | — |
+
+Desktop fills 82%, so that is the density to match — which makes 2.8 the
+right answer and 3.0 too tight on a small phone. `SCALE_PHONE` is now 2.8.
+
+**Timeline entrance animation was shoving the page sideways.** Khalid:
+*"each job has an animation that is comes from right to left... the whole
+screen moves, the white margin appears on the write. not smooth at all"*.
+
+Not our animation — it's `react-vertical-timeline-component`'s own CSS.
+Below 1170px its stylesheet applies:
+
+    animation: cd-bounce-2-inverse .6s
+    0%   { opacity:0; transform: translateX(100px) }
+    60%  { opacity:1; transform: translateX(-20px) }
+    100% { transform: translateX(0) }
+
+In the one-column layout the card is already full width, so opening at
+`translateX(100px)` pushes it 100px past the right edge of the viewport.
+That widens the document for the duration, flashes a horizontal
+scrollbar, and shifts the page — the "white margin on the right". The
+-20px overshoot is what makes it feel abrupt.
+
+Overridden in `index.css` with a fade plus a 14px lift, which never
+leaves the element's own layout box and so cannot change the document
+width. Scoped to the same `max-width: 1169px` the library uses for
+one-column, so the two-column desktop entrance is untouched (it has the
+same latent overflow, but margins either side absorb it and nobody has
+reported it). Also added a `prefers-reduced-motion: reduce` branch that
+drops the card and icon animations entirely, which the library never
+offered.
+
+Specificity: our selector carries four classes against the library's
+three, and lands later in the bundled CSS (index 42334 vs 21275), so it
+wins either way.
+
+Verified as far as this harness allows: both rules and the keyframes are
+present in the served stylesheet, `el.matches()` confirms the element
+matches our selector, and reading the CSSRule back gives
+`animation-name: timeline-card-in, 0.45s, ease-out, both`. What could not
+be checked is the animation actually running — a backgrounded tab reports
+`animationName: none` for *every* element, the library's own rules
+included, so that is the harness and not the CSS.
