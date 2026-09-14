@@ -1,0 +1,6 @@
+# Copy to .dev.vars (gitignored) to run the contact Worker locally:
+#   cp .dev.vars.example .dev.vars
+#
+# Get a key at https://resend.com/api-keys. In production this is NOT a file —
+# it's a Worker secret: `npx wrangler secret put RESEND_API_KEY`
+RESEND_API_KEY=re_replace_me

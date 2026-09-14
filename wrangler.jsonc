@@ -9,11 +9,49 @@
   // (NOT `--assets ./dist`) — declaring assets both on the CLI and here errors.
   "name": "portfolio",
   "compatibility_date": "2026-08-26",
+
+  // The contact form endpoint. Everything else on the site is a static file.
+  "main": "worker/index.js",
+
   "assets": {
     // Vite's production output, served as static files.
     "directory": "./dist",
     // Serve index.html for unknown paths (SPA fallback; the Workers equivalent
     // of the Pages `_redirects` rule, which Workers static assets ignores).
-    "not_found_handling": "single-page-application"
-  }
+    "not_found_handling": "single-page-application",
+    // Lets the Worker serve a static file itself (worker/index.js falls back to
+    // this for anything that isn't an API route).
+    "binding": "ASSETS",
+    // Without this, the SPA fallback above would answer /api/contact with
+    // index.html and the Worker would never run. Only these paths reach the
+    // Worker first; page requests still go straight to the asset server.
+    "run_worker_first": ["/api/*"]
+  },
+
+  "vars": {
+    // Where contact-form messages land. This MUST stay the address the Resend
+    // account is registered under (khalidmueddev@gmail.com) for as long as the
+    // shared onboarding@resend.dev sender below is in use — Resend rejects any
+    // other recipient with a 403. Verifying a real sending domain lifts that
+    // restriction and frees this to be anything.
+    "CONTACT_TO_EMAIL": "khalidmueddev@gmail.com",
+    // Resend's shared sender, which works with no DNS setup. Swap this for
+    // something like "Portfolio <hello@khalidmued.com>" once that domain is
+    // verified in Resend — at which point mail can go to any address.
+    "CONTACT_FROM_EMAIL": "Portfolio <onboarding@resend.dev>"
+  },
+
+  // Per-IP limiter for the contact endpoint. namespace_id is a per-Worker
+  // label, not an account resource — nothing to create in the dashboard.
+  "ratelimits": [
+    {
+      "name": "CONTACT_RATE_LIMIT",
+      "namespace_id": "1001",
+      "simple": { "limit": 5, "period": 60 }
+    }
+  ]
+
+  // RESEND_API_KEY is NOT here on purpose — it's a secret:
+  //   npx wrangler secret put RESEND_API_KEY
+  // For local `wrangler dev`, put it in .dev.vars (gitignored).
 }

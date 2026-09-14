@@ -31,10 +31,18 @@ Known gaps:
 - No project GitHub/live links yet. `ProjectCard` in `Works.jsx` supports an
   optional `source_code_Link` (shows a hover GitHub icon only if present) —
   currently omitted for every project. Ask Khalid for links when he's ready.
-- Contact form's `to_email` in `Contact.jsx` is `khalid.mued@gmail.com`,
-  which does NOT match his actual account email
-  (`khalidmueddev@gmail.com`). This was flagged to Khalid explicitly —
-  **he said keep it as is**. Do not "fix" this again without being asked.
+- Contact form destination is `CONTACT_TO_EMAIL` in `wrangler.jsonc` =
+  `khalidmueddev@gmail.com`, which is the address Khalid's Resend account
+  is registered under. **It has to stay that** while the shared
+  `onboarding@resend.dev` sender is in use: Resend rejects any other
+  recipient with a 403. Khalid initially asked for `khalid.mued@gmail.com`
+  (the old EmailJS destination, and a different mailbox — Gmail ignores
+  dots, so that one is the same as `khalidmued@gmail.com`, but the `dev`
+  suffix makes the Resend account a separate account); he chose to point
+  at the Resend address instead once the constraint was clear. Verifying a
+  sending domain in Resend is what frees this to be any address.
+- `RESEND_API_KEY` has been set as a Worker secret by Khalid. It is NOT in
+  the repo and never should be.
 - Feedbacks/testimonials were intentionally replaced with a "By the Numbers"
   stats section (`Highlights.jsx`) since there were no real testimonials.
   `testimonials` is still exported (empty array) from constants in case real
@@ -227,6 +235,12 @@ https://github.com/KhalidMued/Portfolio/pull/10 — working tree clean, no
 local branch ahead of `origin/main`. The main redesign before that was
 PR #7, squashed as `3abded2`.
 
+**Deployment**: the site runs on Cloudflare Workers at
+https://portfolio.khalid-mued.workers.dev, deployed with a bare
+`npx wrangler deploy` (no flags — `wrangler.jsonc` carries everything).
+The contact Worker went live from the `feat/contact-worker-resend` branch
+before PR #12 merged, so production may be ahead of `main` until it does.
+
 Khalid's workflow for this repo is one PR per change, squash-merged into
 `main` (every commit on `main` is a `(#N)` squash). So: branch off an
 up-to-date `origin/main` and commit there — don't commit straight to
@@ -254,6 +268,21 @@ unless he asked for it in that exchange — see CLAUDE.md.
 
 ## Open / not yet addressed
 
+- **Contact form is live and fully verified**, locally and in production
+  (see the deployment note under "Git state"). Nothing outstanding on it
+  except the key rotation below.
+- **Rotate `RESEND_API_KEY`.** The key was printed into a session
+  transcript: `.dev.vars` had been saved as the bare key with no
+  `RESEND_API_KEY=` prefix, and an inspection command meant to show only
+  the variable name and value length printed the whole line instead.
+  Rotate in the Resend dashboard, update `.dev.vars`, re-run
+  `npx wrangler secret put RESEND_API_KEY`, and redeploy. No code change.
+- **`khalidmued.com` does not resolve.** The zone exists but the apex has
+  no A/AAAA/CNAME record and `www` doesn't exist at all
+  (`Resolve-DnsName` returns SOA only). `index.html`'s `canonical` and
+  `og:url` both point there, so link previews and SEO currently reference
+  a dead host. Verifying that domain in Resend would also lift the
+  "delivery only to the account's own address" restriction.
 - Broader "too purply" feedback — only addressed in the About section so
   far. Khalid may want more color variety elsewhere (Hero, Navbar, Works,
   etc.) — ask before doing a wider recolor.

@@ -596,3 +596,129 @@ origin/fix/hero-scroll-indicator-hitbox main` was empty, proving the
 squash captured everything. One commit on `fix/hero-scroll-indicator`
 read `+` as well (the CLAUDE.md no-unasked-PRs instruction); confirmed
 present in `main:CLAUDE.md` before deleting.
+
+**Contact form was dead; replaced EmailJS with a Cloudflare Worker +
+Resend.** Khalid: *"lets find why the contact form is not working also if
+there is a better tech way to do it the emailjs i'm open for it"*, and he
+reported an error toast on submit.
+
+Diagnosis, by probing the EmailJS REST API from the page with one
+credential swapped out at a time — each of those fails validation before
+anything is delivered, so nothing was sent:
+
+| Probe | Result |
+| --- | --- |
+| real key + real service + bogus template | `400 The template ID not found` |
+| real key + bogus service + real template | `400 The service ID not found` |
+| bogus key + real service + real template | `400 The Public Key is invalid` |
+
+The bogus-template case getting *past* the key and service checks proved
+both were valid, so the credentials in the bundle were fine. With his
+go-ahead, one real send gave the actual answer:
+
+    HTTP 412 — Gmail_API: Invalid grant. Please reconnect your Gmail account
+
+The EmailJS service's Gmail OAuth refresh token had been revoked. Nothing
+in the repo was wrong. Reconnecting Gmail in the dashboard would have
+fixed it for a while and then broken again the same way, which is why he
+chose to move off it.
+
+**What replaced it** (`worker/index.js`, wired up in `wrangler.jsonc`):
+`POST /api/contact` on the site's own origin. The Resend API key is a
+Worker secret, so nothing about mail delivery is in the client bundle any
+more. The Worker re-validates every field (the form's `maxLength` values
+are a suggestion, not a limit), caps the body at 16 kB, checks the
+honeypot, rate-limits per IP, and returns a generic message on failure
+while logging the real upstream error server-side.
+
+Config details worth remembering:
+
+- `not_found_handling: "single-page-application"` would have answered
+  `/api/contact` with `index.html` and the Worker would never have run.
+  `assets.run_worker_first: ["/api/*"]` is what routes API paths to the
+  Worker while page requests still go straight to the asset server.
+- The rate limiter's `namespace_id` is a per-Worker label, not an account
+  resource — there's nothing to create in the dashboard for it.
+- The honeypot is *sent* to the Worker rather than short-circuited in the
+  browser, so the decision lives in the one place a visitor can't edit.
+  A flagged submission gets a plain `200` and no mail, so a bot learns
+  nothing from the response.
+- `CONTACT_TO_EMAIL` had to change from the old `khalid.mued@gmail.com` to
+  `khalidmueddev@gmail.com`: Resend only delivers to the address its own
+  account is registered under until a sending domain is verified. Khalid
+  had previously said to leave the old address alone, so this is a
+  deliberate reversal with a reason, not a re-fix of settled ground.
+
+Verified against `wrangler dev` on `:8787` (which serves the built site
+and the Worker together, so it's the closest thing to production):
+`wrangler deploy --dry-run` shows all four bindings resolving; wrong
+method → 405; empty / partial / non-JSON / array bodies → 400; bad email
+→ 400; over-length field → 400; 20 kB body → 413; honeypot filled → 200
+with no Resend call (confirmed against the request log); sixth request in
+a minute → 429. A valid submission with a deliberately dummy key returns
+`502 {"error":"Something went wrong. Please try again."}` to the client
+while the log holds the real `401 API key is invalid` — exactly the split
+that was wanted. Driven through the actual form in the browser too: the
+Worker's message reached the toast and the button reset.
+
+Not verified: a successful send. That needs a real Resend key, which only
+Khalid can create. `npx eslint src worker --ext js,jsx` clean,
+`npm run build` green.
+
+Also found along the way: **`khalidmued.com` has no DNS records** — the
+zone exists but the apex has no A/AAAA/CNAME and `www` doesn't exist, so
+the `canonical` and `og:url` in `index.html` point at a host that doesn't
+resolve. Left alone, recorded in STATUS.md.
+
+
+**Contact form destination: `khalidmueddev@gmail.com`**, and
+`RESEND_API_KEY` is set as a Worker secret (Khalid set it; it is not in
+the repo). The destination has to be the address the Resend account
+itself is registered under for as long as the shared
+`onboarding@resend.dev` sender is in use — Resend rejects any other
+recipient with a 403. Khalid first asked for `khalid.mued@gmail.com` (the
+old EmailJS destination), then mentioned the Resend account is registered
+under `khalidmueddev@gmail.com`, which made the first choice
+undeliverable; given the options he chose to point the endpoint at the
+Resend address. Verifying a sending domain in Resend is what would free
+this to be any address.
+
+Worth noting these are genuinely two mailboxes: Gmail ignores dots, so
+`khalid.mued@gmail.com` is the same inbox as `khalidmued@gmail.com`, but
+the `dev` suffix makes the Resend account a separate account.
+
+**End-to-end verified with a real key.** Khalid put his Resend key in a
+local `.dev.vars` and two real sends went through `wrangler dev`: a direct
+POST to `/api/contact` returned `200 {"ok":true}` with a clean log, and a
+submission driven through the actual form UI produced the success toast,
+reset the button and cleared all three fields. That closes the one path
+that had never been exercised.
+
+Two operational notes from that session. First, `.dev.vars` must be
+`RESEND_API_KEY=re_...` — it was saved as the bare key with no variable
+name, which wrangler treats as a variable named after the key with an
+empty value. Second, and the reason that key needs rotating: an
+inspection command written to print only the variable name and the
+value's length printed the whole line instead, precisely because the file
+had no `=` in it. Don't `cat`, `awk` or `grep` a secrets file on the
+assumption it is well-formed — check its shape first, or don't read it.
+
+**Deployed, and PR #12 opened.** `npx wrangler deploy` put the Worker
+live at https://portfolio.khalid-mued.workers.dev (version
+`0e1f9e83-bd19-4504-b0ba-b32083604fea`). `wrangler secret list` confirms
+`RESEND_API_KEY` is present on the deployed Worker. Note this deployed
+from the feature branch, so production ran ahead of `main` until #12
+merged.
+
+Verified against production, not just locally: `/api/contact` actually
+reaches the Worker rather than being swallowed by the SPA fallback — bad
+email returns 400, a filled honeypot returns 200 with no send, and GET
+returns 405. Then a real submission through the live form produced the
+success toast, reset the button and cleared the fields. That is the
+`run_worker_first` routing proving itself in the only environment where
+it matters.
+
+Outstanding: rotate the Resend API key (see STATUS.md). Also still true —
+`khalidmued.com` has no DNS records, so the canonical/og URLs in
+`index.html` point at a host that doesn't resolve while the site actually
+lives on the workers.dev subdomain.
