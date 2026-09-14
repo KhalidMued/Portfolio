@@ -996,3 +996,193 @@ section reported nothing for either, which is the tab being throttled,
 not evidence. Lint clean, build green, and both `amount:"some"` and the
 margin are present in the built bundle. Needs a look on a real phone
 after deploy.
+
+**Experience content edits** (`src/constants/index.js`), at Khalid's
+request:
+
+| Entry | Was | Now |
+| --- | --- | --- |
+| top (Dec 2025 — Present) | Network Security Junior | **SecOps** |
+| middle (Jun 2025 — Dec 2025) | COOP Trainee | **Network Security Junior** |
+| bottom | Apr 2022 — Jun 2025 | **Apr 2019 — Jun 2025** |
+
+The two title changes are a shuffle, not independent renames — the middle
+entry takes the name the top one used to have. Applied top-down so the
+string being matched was unique at each step; a blind find-and-replace on
+"Network Security Junior" would have hit both.
+
+Checked for anything that would now contradict the earlier start date:
+`stats` makes no claim about years of experience, so nothing else needed
+touching.
+
+Verified by rendering at 390px wide and reading the timeline back — the
+three titles and three dates are exactly as above. Note the timeline
+entries are `visibility: hidden` until scrolled into view, so `innerText`
+returns nothing for them; `textContent` is what to query. Lint clean,
+build green.
+
+**Skills section: tidied the tabs and the badge grid** (`Tech.jsx`), on
+Khalid's note that both were "scattered" on mobile.
+
+*Tabs.* Were `flex flex-wrap`, so on a phone the four labels wrapped by
+their own widths into a ragged 2 + 1 + 1. Now
+`grid grid-cols-2 ... sm:flex sm:justify-center` with `w-full sm:w-auto`
+on each button: **2 + 2 in equal columns on phones**, a centred single
+row once there's space. Measured at 390px, all four buttons come out
+exactly 158x57.
+
+Khalid asked for "3 on top and 2 under" — but there are only four tabs,
+so that isn't achievable as stated. Went with an even 2 + 2 and flagged
+the discrepancy; 3 + 1 is a one-word change if that's what he meant.
+Three-across on a phone would give each tab ~100px, and
+"Infrastructure & Systems" does not fit in that.
+
+*Badges.* Were `flex flex-wrap` pills sized to their own text, so rows
+ended ragged — "C" sitting next to "Barracuda SecureEdge / ZTNA". Now
+`grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4` with `h-full` on each
+badge, so every cell in a row is the same width and the row's tallest
+item sets the height. Shape changed from `rounded-full` to `rounded-xl`,
+which suits a wrapping multi-line label better than a pill.
+
+Three things that had to change together for that to work:
+
+1. Dropped `whitespace-nowrap` from the label — in a fixed-width cell it
+   would push text out rather than wrap.
+2. Added `flex-1 min-w-0` to the label span. Without it the span sizes to
+   its content instead of the cell, so long names wrapped earlier and
+   taller than necessary — the text column measured 67px instead of
+   100px at phone width.
+3. Added `break-words`. "Firewall Policy & Troubleshooting" contains a
+   single word wider than the phone-width column and was measured
+   overflowing its cell; nothing else in the four groups does.
+
+Verified across 360 / 390 / 430 / 768 / 1280: uniform badge widths at
+each breakpoint (143 / 158 / 178 / 200 / 275), no label overflowing its
+cell, and no horizontal document overflow anywhere.
+
+Method note for next time: React state changes can't be driven from this
+harness — clicking the tab buttons in a backgrounded iframe does nothing,
+because React 18's scheduler is throttled along with rAF. The other three
+groups' labels were checked by measuring them through a probe span
+carrying the badge's computed font and column width instead.
+
+**Projects section: cover art was being cropped at every breakpoint.**
+Khalid: *"some of the drawing are pushed to on side and some titles for
+these cards are pushed to certain side and not appearing fully"*.
+
+One root cause for both symptoms. `Frame` in `ProjectCovers.jsx` rendered
+every cover with `preserveAspectRatio="xMidYMid slice"` — which scales the
+art to *cover* the box and crops whatever doesn't fit — while `Works.jsx`
+gave it a fixed `h-[220px]` box whose width came from the layout. The box
+was therefore a different shape from the 400x230 viewBox at every width,
+and `slice` quietly ate the difference:
+
+| Width | Cover box | Art drawn at | Cropped |
+| --- | --- | --- | --- |
+| 390 | 285x220 | 383x220 | **98px horizontally** (49 each side) |
+| 1280 | 482x220 | 482x277 | **57px vertically** (28 each side) |
+
+A quarter of the artwork's width was gone on a phone. That is both
+complaints in one: the diagrams looked shoved sideways, and the labels
+*inside* them — `ArchitectureCover`'s "UI" / "API" / "Agent" / "Data"
+boxes sit at x=30 and x=300, `IncidentCover`'s caption, `ZtnaCover`'s
+chain labels — were sliced through, which is the "titles not appearing
+fully". The card's own `<h3>` was measured and never overflowed; the
+titles he meant are drawn inside the SVG.
+
+Fixed on both sides of the contract: `Frame` now uses `meet`, and the
+card's cover box is `aspect-[400/230]` instead of a fixed height, so the
+box always matches the viewBox and `meet` fits exactly — no crop and no
+letterboxing either. Commented in both files that the ratio is duplicated
+and must move together.
+
+Verified across 360 / 390 / 430 / 768 / 1280: the box measures a 1.739
+ratio at every one, drawn size equals box size exactly (letterbox 0x0),
+and the count of SVG elements extending outside the section went 3 -> 0.
+
+All six covers share that one `Frame`, so this fixes both tabs at once —
+which matters because React state can't be driven from this harness, so
+the Network & Security tab couldn't be opened to look at. Checked
+statically instead: every literal coordinate in all six covers sits
+inside the 400x230 viewBox, so nothing is clipped by the viewBox itself.
+
+Also, while in there: the card title is now `text-[19px] sm:text-[22px]`
+with `leading-tight` and `break-words`, and the text column got `min-w-0`
+— a flex child defaults to `min-width:auto` and won't shrink below its
+content, which is how a long unbroken name would have forced the column
+wider than its share.
+
+**Earth globe enlarged on phones only** (`Earth.jsx`), per Khalid: too
+small for the space around it on mobile.
+
+The scale was a flat `1.8`, chosen back when `2.5` was clipping — but the
+clipping case was the desktop `xl` column, which is narrow and tall
+(589x927) and therefore has the least horizontal room of any layout. The
+camera shows a fixed 45° vertically, so horizontal extent is that times
+the aspect ratio; at `xl` that works out to 4.11 world units against 6.47
+vertical. The phone layout is the opposite shape — ~327x350, nearly
+square — with about 1.5x the horizontal room, so `1.8` there left a ring
+of dead space.
+
+Now `2.3` on phones and `1.8` everywhere else, keyed on
+`useThree(state => state.size.width) < 480`. **The canvas width, not the
+window's**: the canvas is ~327 on a phone but 625 at `md` and 589 at
+`xl`, so a window-width test would have caught `xl` — the one layout that
+must not grow — while a canvas-width cut at 480 separates the phone
+layout cleanly.
+
+Checked the arithmetic rather than guessing at the number. Deriving an
+upper bound for the model's extent from the fact that 1.8 fits the xl box
+(2.284 world units per unit of scale):
+
+| Layout | Canvas | Visible extent | Scale | Needs | Margin |
+| --- | --- | --- | --- | --- | --- |
+| 360px phone | 312x350 | 5.77 x 6.47 | 2.3 | 5.25 | 9% |
+| 390px phone | 327x350 | 6.05 x 6.47 | 2.3 | 5.25 | 13% |
+| 430px phone | 382x350 | 7.06 x 6.47 | 2.3 | 5.25 | 19% |
+| md 768 | 625x550 | 7.35 x 6.47 | 1.8 | 4.11 | 36% |
+| xl 1280 | 589x927 | 4.11 x 6.47 | 1.8 | 4.11 | 0% |
+
+The margins are conservative: the extent is an upper bound, since 1.8 was
+recorded as fitting the xl box *with* room to spare, so the real
+clearances are larger than shown. A 28% increase on phones with at least
+9% clearance on the smallest one.
+
+Not visually verified — the canvas never renders in this backgrounded
+browser (it sits at the unsized 300x150 default), so the numbers come
+from the CSS box measurements and the camera maths, not from looking.
+Worth an eyeball on a phone.
+
+**Hero desk model shrunk on phones only** (`Computers.jsx`).
+
+The ternary read `scale={isMobile ? 0.75 : 0.75}` — the mobile branch had
+existed all along but was never given its own value, so phones drew the
+desk at exactly the desktop size. (The `position` branch beside it *was*
+differentiated, which is probably how it went unnoticed.)
+
+Why that reads as oversized: the camera is fixed at 25° vertical, so how
+much of the desk fits across the frame depends entirely on the hero's
+aspect ratio — and the hero is a completely different shape on a phone.
+Measured:
+
+| Layout | Hero box | Aspect | Horizontal room | vs desktop |
+| --- | --- | --- | --- | --- |
+| 360 phone | 345x780 | 0.442 | 4.08 units | 31% |
+| 390 phone | 375x844 | 0.444 | 4.10 units | 32% |
+| 430 phone | 415x932 | 0.445 | 4.11 units | 32% |
+| md 768 | 753x1024 | 0.735 | 6.79 units | 52% |
+| desktop 1280 | 1265x900 | 1.406 | 12.99 units | 100% |
+
+A phone has under a third of the width to work with while drawing the
+model at full size. Scaling strictly in proportion would mean ~0.24 and a
+speck of a desk — the hero deliberately wants it large and slightly
+overflowing as a backdrop — so `0.6` is a measured step down rather than
+a proportional one.
+
+Desktop is untouched: the existing `matchMedia('(max-width: 500px)')`
+gate already separates phones from `md` upward, so 768 and 1280 keep
+0.75. Confirmed in the built chunk: `h=.6,u=.75` with `scale:s?h:u`.
+
+Not visually verified, same reason as the globe — the canvas never
+renders in this backgrounded browser. If 0.6 is now too small, 0.65 is
+the next step; the constants are named at the top of the file.

@@ -37,7 +37,11 @@ const ProjectCard = ({ index, name, description, tags, cover, stats, category, f
         options={{ max: 25, scale: 1, speed: 450 }}
         className="group bg-tertiary surface-elevate p-5 rounded-2xl flex flex-col justify-between sm:flex-row sm:items-center gap-6 min-h-[260px]"
       >
-        <div className="relative w-full sm:w-[45%] h-[220px]">
+        {/* aspect-[400/230] matches the cover SVG's viewBox exactly, so the
+            diagram fits with nothing cropped and nothing letterboxed. A fixed
+            height here is what broke it before: the box ended up a different
+            shape from the art at every breakpoint. */}
+        <div className="relative w-full sm:w-[45%] aspect-[400/230] shrink-0">
           <div className="w-full h-full rounded-2xl overflow-hidden">
             <Cover accent={color} />
           </div>
@@ -63,8 +67,10 @@ const ProjectCard = ({ index, name, description, tags, cover, stats, category, f
           )}
         </div>
 
-        <div className="sm:w-[55%]">
-          <h3 className="text-heading font-bold text-[22px]">{name}</h3>
+        <div className="sm:w-[55%] min-w-0">
+          <h3 className="text-heading font-bold text-[19px] sm:text-[22px] leading-tight break-words">
+            {name}
+          </h3>
           <p className="mt-2 text-secondary text-[13px] leading-[22px]">{description}</p>
 
           {stats && (

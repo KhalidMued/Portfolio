@@ -5,8 +5,16 @@
 // chain) — rendered with currentColor so it tracks the light/dark theme, tinted
 // with the project's own accent color.
 
+// `meet`, never `slice`. These aren't photographs where cropping the edges is
+// harmless — they're diagrams with labelled boxes ("UI", "API", "Data") and
+// captions sitting near the viewBox edges, and `slice` cut straight through
+// them. At phone width the cover box was 285x220 against a 400x230 viewBox, so
+// `slice` scaled to 0.957 and chopped 98px — 49px off each side, about a
+// quarter of the artwork. Desktop lost 57px vertically for the same reason.
+// The card gives this an `aspect-[400/230]` box so `meet` fits exactly, with
+// no letterboxing either; if that ratio changes, change it in both places.
 const Frame = ({ children }) => (
-  <svg viewBox="0 0 400 230" className="w-full h-full" preserveAspectRatio="xMidYMid slice">
+  <svg viewBox="0 0 400 230" className="w-full h-full" preserveAspectRatio="xMidYMid meet">
     {children}
   </svg>
 );
