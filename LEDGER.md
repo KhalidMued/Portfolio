@@ -827,3 +827,39 @@ card is reachable on `portfolio.khalidmued.com` too.
 Left for Khalid: LinkedIn, X and Facebook may already have cached the old
 imageless preview, so those need a forced re-scrape (Post Inspector /
 Card Validator) before the new card shows up in a paste.
+
+**Facebook's Sharing Debugger returned 403.** Khalid: *"facebook said 403:
+URL returned a bad HTTP response code. please allowlist facebookexternalhit
+on your sites robots.txt to utilize scrapping"*.
+
+Two separate things, only one of which is in this repo.
+
+**In the repo — /robots.txt was serving HTML.** The site had no robots.txt
+at all, and `not_found_handling: "single-page-application"` means any
+unmatched path returns index.html. So every crawler asking for a plain-text
+policy got a page of markup with a 200. Added `public/robots.txt`; a real
+`.txt` asset is matched before the SPA fallback, so it now serves as
+`text/plain`. Note the robots.txt grouping rule, which is easy to get wrong:
+a named `User-agent:` group *replaces* the wildcard group for that agent
+rather than adding to it, so each named crawler repeats its own `Allow: /`.
+
+**Probably NOT in the repo — the 403 itself.** Requesting the live site with
+each social crawler's User-Agent (facebookexternalhit, LinkedInBot,
+Twitterbot, Slackbot, WhatsApp) returned `200` for both the page and the
+card from here, so nothing is blocking on User-Agent. Cloudflare sits in
+front, and the likeliest source of a 403 to Facebook specifically is bot
+protection scoring by IP/ASN — **Bot Fight Mode** (Security → Bots) is known
+to block social preview crawlers. That's a dashboard setting; only Khalid
+can check it.
+
+**Also fixed while in `public/_headers`:** the CSP still carried
+`connect-src 'self' https://api.emailjs.com`. EmailJS was removed in PR #12
+— the form posts to `/api/contact` on the same origin, which `'self'`
+already covers — so that exception had been dead since the migration.
+Tightened to `connect-src 'self'` and the comment above it updated to say
+why.
+
+Verified against `wrangler dev`: `/robots.txt` returns `200 text/plain`
+with the file's contents, a deep route still falls back to index.html,
+`/api/contact` still reaches the Worker (405 on GET), and the served CSP
+header no longer mentions emailjs.

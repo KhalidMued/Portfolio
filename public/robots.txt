@@ -1,0 +1,43 @@
+# Everything on this site is public and meant to be indexed and previewed.
+#
+# This file exists because without it the Workers SPA fallback
+# (not_found_handling: "single-page-application") answered /robots.txt with
+# index.html — crawlers asking for a plain-text policy got a page of HTML.
+# Facebook's Sharing Debugger reported that as an error and asked for
+# facebookexternalhit to be allowlisted here.
+#
+# A real .txt asset is matched before the fallback, so this ends that.
+
+User-agent: *
+Allow: /
+# POST-only endpoint; a GET returns 405. Nothing to crawl.
+Disallow: /api/
+
+# Link-preview crawlers, listed explicitly. A named group REPLACES the wildcard
+# group for that agent rather than adding to it, so each one repeats Allow: /.
+User-agent: facebookexternalhit
+Allow: /
+
+User-agent: facebookcatalog
+Allow: /
+
+User-agent: Twitterbot
+Allow: /
+
+User-agent: LinkedInBot
+Allow: /
+
+User-agent: Slackbot-LinkExpanding
+Allow: /
+
+User-agent: Slackbot
+Allow: /
+
+User-agent: WhatsApp
+Allow: /
+
+User-agent: Discordbot
+Allow: /
+
+User-agent: TelegramBot
+Allow: /
