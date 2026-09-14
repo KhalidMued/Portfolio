@@ -1020,3 +1020,48 @@ three titles and three dates are exactly as above. Note the timeline
 entries are `visibility: hidden` until scrolled into view, so `innerText`
 returns nothing for them; `textContent` is what to query. Lint clean,
 build green.
+
+**Skills section: tidied the tabs and the badge grid** (`Tech.jsx`), on
+Khalid's note that both were "scattered" on mobile.
+
+*Tabs.* Were `flex flex-wrap`, so on a phone the four labels wrapped by
+their own widths into a ragged 2 + 1 + 1. Now
+`grid grid-cols-2 ... sm:flex sm:justify-center` with `w-full sm:w-auto`
+on each button: **2 + 2 in equal columns on phones**, a centred single
+row once there's space. Measured at 390px, all four buttons come out
+exactly 158x57.
+
+Khalid asked for "3 on top and 2 under" — but there are only four tabs,
+so that isn't achievable as stated. Went with an even 2 + 2 and flagged
+the discrepancy; 3 + 1 is a one-word change if that's what he meant.
+Three-across on a phone would give each tab ~100px, and
+"Infrastructure & Systems" does not fit in that.
+
+*Badges.* Were `flex flex-wrap` pills sized to their own text, so rows
+ended ragged — "C" sitting next to "Barracuda SecureEdge / ZTNA". Now
+`grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4` with `h-full` on each
+badge, so every cell in a row is the same width and the row's tallest
+item sets the height. Shape changed from `rounded-full` to `rounded-xl`,
+which suits a wrapping multi-line label better than a pill.
+
+Three things that had to change together for that to work:
+
+1. Dropped `whitespace-nowrap` from the label — in a fixed-width cell it
+   would push text out rather than wrap.
+2. Added `flex-1 min-w-0` to the label span. Without it the span sizes to
+   its content instead of the cell, so long names wrapped earlier and
+   taller than necessary — the text column measured 67px instead of
+   100px at phone width.
+3. Added `break-words`. "Firewall Policy & Troubleshooting" contains a
+   single word wider than the phone-width column and was measured
+   overflowing its cell; nothing else in the four groups does.
+
+Verified across 360 / 390 / 430 / 768 / 1280: uniform badge widths at
+each breakpoint (143 / 158 / 178 / 200 / 275), no label overflowing its
+cell, and no horizontal document overflow anywhere.
+
+Method note for next time: React state changes can't be driven from this
+harness — clicking the tab buttons in a backgrounded iframe does nothing,
+because React 18's scheduler is throttled along with rAF. The other three
+groups' labels were checked by measuring them through a probe span
+carrying the badge's computed font and column width instead.
