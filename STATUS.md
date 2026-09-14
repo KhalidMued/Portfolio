@@ -220,16 +220,33 @@ Known gaps:
 
 ## Git state
 
-The main redesign shipped as PR #7
-(`redesign/dev-security-two-sides` → `main`), squash-merged as `3abded2`:
-https://github.com/KhalidMued/Portfolio/pull/7
+Everything through the review pass is **merged**. `main` is at `abe5b62`,
+the squash of PR #10 (hero scroll button, hero seam, navbar logo, both
+light-mode starfield passes):
+https://github.com/KhalidMued/Portfolio/pull/10 — working tree clean, no
+local branch ahead of `origin/main`. The main redesign before that was
+PR #7, squashed as `3abded2`.
 
 Khalid's workflow for this repo is one PR per change, squash-merged into
 `main` (every commit on `main` is a `(#N)` squash). So: branch off an
 up-to-date `origin/main` and commit there — don't commit straight to
 `main`, and don't keep reusing a branch whose PR has already been merged
-(GitHub deletes the branch on merge, and the local copy's history goes
-stale against the squashed commit).
+(its history goes stale against the squashed commit). PR #10 drifted from
+"one PR per change" — it started as just the scroll-indicator fix and the
+review pass kept landing on the same branch until it carried six commits.
+Start a fresh branch per topic rather than letting that happen again.
+
+Branches are clean as of 2026-09-14: `main` is the only branch locally
+and on the remote. Six stale ones (`cleanup/safe-tidy`,
+`feature/audit-cleanup`, `fix/hero-scroll-indicator`,
+`fix/remove-redirects-loop`, `fix/hero-scroll-indicator-hitbox`) were
+deleted after confirming every one was already in `main`. Note the check
+that matters here: because this repo squash-merges, `git log
+origin/main..<branch>` always looks like unmerged work. Use `git cherry
+-v main <branch>` (a `-` means the patch is already in `main`), and for a
+squashed branch whose commits all read `+`, compare the trees instead —
+`git diff --stat <branch> main` came back empty for #10's branch, which
+is what proved the squash had captured everything.
 
 **Stop at the commit.** Khalid verifies the change himself first, then
 asks for the PR. Do not run `gh pr create`, and do not push a branch,
