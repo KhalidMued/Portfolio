@@ -52,10 +52,21 @@ body {
   transition: background-color 0.3s ease, color 0.3s ease;
 }
 
+/*
+ * Invisible scroll-anchor offset, so `#section` links don't land underneath the
+ * fixed navbar. The negative margin + padding makes it a ~124px-tall box pulled
+ * up into the PREVIOUS section — and since every SectionWrapper section is
+ * `relative z-0` (its own stacking context, painted above the earlier ones),
+ * that box sat on top of the last ~100px of whatever came before it and ate
+ * clicks there. It's an empty spacer, so it must never be a hit-test target:
+ * that dead zone is what made the hero's scroll-down button clickable only
+ * along its top few pixels.
+ */
 .hash-span {
   margin-top: -100px;
   padding-bottom: 100px;
   display: block;
+  pointer-events: none;
 }
 
 /*
@@ -98,6 +109,15 @@ body {
   background-color: transparent;
 }
 
+/*
+ * Both decorative hero layers (the starfield art and the contrast scrim) fade
+ * out before the hero's bottom edge, so neither one cuts off against the flat
+ * page colour below it. Anything painted here that reaches the hero's last
+ * pixel row WILL read as a hard horizontal seam, because the next section has
+ * no equivalent layer — that was true of the scrim, whose radial centre sits
+ * at 22% across, so the seam it produced was obvious on the LEFT of the page
+ * and invisible on the right where the scrim had already faded to nothing.
+ */
 .bg-hero-pattern::before,
 .bg-hero-pattern::after {
   content: "";
@@ -105,6 +125,8 @@ body {
   inset: 0;
   z-index: -1;
   pointer-events: none;
+  mask-image: linear-gradient(to bottom, black 0%, black 55%, transparent 75%);
+  -webkit-mask-image: linear-gradient(to bottom, black 0%, black 55%, transparent 75%);
 }
 
 .bg-hero-pattern::before {
@@ -125,14 +147,6 @@ body {
    * canvas + ctx.filter readback if --color-primary ever changes again.
    */
   filter: invert(1) hue-rotate(180deg) saturate(1.3) sepia(0.15) contrast(0.93);
-  /* Fade the starfield out before the hero's bottom edge instead of letting it
-     cut off abruptly where the next section begins. Without this the art's
-     average tone (the field plus all that faint line work) sits slightly
-     lighter than the flat page colour below it, so the cut-off reads as a hard
-     horizontal seam — which is exactly what it looked like in dark mode while
-     this layer was disabled there. Fully transparent by 75%. */
-  mask-image: linear-gradient(to bottom, black 0%, black 55%, transparent 75%);
-  -webkit-mask-image: linear-gradient(to bottom, black 0%, black 55%, transparent 75%);
 }
 
 .bg-hero-pattern::after {

@@ -88,6 +88,15 @@ No test suite exists yet.
   invisible in code review (Framer Motion propagation, timeline icon
   centering, 3D model overlapping content) and only showed up on screen.
 
+## IMPORTANT — do not open pull requests unasked
+
+Khalid reviews changes himself before they become a PR. **Never run
+`gh pr create` (or otherwise open a PR) unless he has explicitly asked for
+it in that exchange.** The normal loop is: make the change → verify it →
+tell him what changed and let him look → wait. He will say when he wants a
+PR opened. The same caution applies to pushing: don't push a branch he
+hasn't asked you to push. Committing locally is fine and expected.
+
 ## IMPORTANT — keep the docs current
 
 **`STATUS.md` and `LEDGER.md` must be kept up to date.** After any

@@ -69,14 +69,15 @@ const Navbar = () => {
             }}
           >
             <img src={logo} alt="logo" className="w-9 h-9 object-contain" />
-            <p className="text-heading text-[18px] font-bold cursor-pointer flex">
-               Khalid &nbsp;
-             <span className="sm:block hidden"> | &nbsp; Developer × Security </span></p>
-
+            <p className="text-heading text-[18px] font-bold cursor-pointer flex items-center gap-2 whitespace-nowrap">
+              <span>Khalid</span>
+              <span className="hidden lg:inline text-secondary font-normal">|</span>
+              <span className="hidden lg:inline">Developer × Security</span>
+            </p>
           </Link>
 
-          <div className="hidden sm:flex flex-row items-center gap-8">
-            <ul className="list-none flex flex-row gap-10">
+          <div className="hidden md:flex flex-row items-center gap-8">
+            <ul className="list-none flex flex-row gap-6 xl:gap-10">
               {navLinks.map((link) => (
                 <li
                 key={link.id}
@@ -96,7 +97,7 @@ const Navbar = () => {
           </div>
 
 
-          <div className='sm:hidden flex flex-1 justify-end items-center gap-4'>
+          <div className='md:hidden flex flex-1 justify-end items-center gap-4'>
             <ThemeToggle />
             <img
              src={toggle ? close : menu}

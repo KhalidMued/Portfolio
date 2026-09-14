@@ -359,3 +359,212 @@ of back-and-forth. Two things that fixed it: prefer plain `screenshot`
 over `zoom`, and if the zoom is already stuck, serve the dev server on a
 different origin (`npm run dev -- --host 127.0.0.1`, then browse
 `http://127.0.0.1:5173`) to get a fresh origin at 100% zoom.
+
+**Hero scroll indicator: dead click area + bigger oval wheel**: Khalid
+reported the scroll-down button only responded along its top edge, and
+asked for the moving dot inside it to be larger and oval.
+
+The click bug was NOT in the button. Probed it with
+`document.elementFromPoint` across the pill: the top ~5% hit the anchor,
+everything below hit `span.hash-span`. That's the invisible scroll-anchor
+offset spacer `SectionWrapper` renders for every section
+(`margin-top:-100px; padding-bottom:100px`) — a ~124px-tall box pulled up
+100px into the *previous* section. Because every SectionWrapper section is
+`relative z-0` (its own stacking context, painted above earlier siblings),
+that spacer sat on top of the last ~100px of whatever preceded it. The
+hero's indicator lives in exactly that band, so all but its top sliver was
+dead. Note this was a pre-existing, site-wide dead zone — the bottom
+~100px of every section — that only became obvious once the indicator was
+moved down in PR #9.
+
+Fixed at the root: `pointer-events: none` on `.hash-span` in `index.css`.
+It's an empty spacer; it should never be a hit-test target. Verified with
+a 15-point probe grid across the pill (was 1/5 clickable, now 15/15) and
+by actually clicking the pill's lower half — the URL went to `#about`.
+
+Also, per the request: the dot is now `w-[5px] h-[9px]` (a vertical
+capsule rather than a 6px circle) with travel retuned to `[0, 11, 0]` for
+the 22px inner track, and `mb-1` dropped. And the anchor got `block p-2`,
+which grows the tap target from 26x36 to 42x52 without moving the pill —
+the wrapper offset went `xs:bottom-2` → `xs:bottom-0` to compensate, so
+the pill still sits 8px above the hero's bottom edge exactly as before.
+
+## 2026-09-14
+
+**The last of the Hero/About seam (light mode, left side only)**: Khalid
+spotted what the previous two seam fixes had missed and diagnosed it
+himself — *"on the right section of the page there is a light green-ish
+color that breaks the color difference with the top section, but its not
+on the left side, that's why on the left side I see a line of color
+difference"*. That asymmetry was the whole clue.
+
+The culprit was `.bg-hero-pattern::after`, the hero's contrast scrim:
+`radial-gradient(circle at 22% 38%, rgba(255,251,244,0.75),
+rgba(255,251,244,0) 60%)`. Two properties of it combined:
+
+- Its centre sits at **22% across**, so it's bright on the left and has
+  already faded to zero by the right-hand side of the page.
+- Unlike the `::before` starfield layer, it carried **no mask**, so it was
+  still painting at full local strength on the hero's very last pixel row
+  and then stopped dead — the section below has no equivalent layer.
+
+So the hero's bottom-left was ~0.5 alpha of warm ivory over the page
+colour and the section below it was the bare page colour: a hard step. On
+the right the scrim was already at zero, so both sides matched and no line
+appeared — which also explains why the teal half of `.page-depth`'s
+ambient wash (Khalid's "light green-ish color") seemed to be "fixing" that
+side. It wasn't; there was simply nothing to fix there.
+
+Confirmed before changing anything by injecting
+`.bg-hero-pattern::after { content: none !important }` into the live page
+— the left-hand line vanished.
+
+Fix: moved the `mask-image` / `-webkit-mask-image`
+(`linear-gradient(to bottom, black 0%, black 55%, transparent 75%)`) out
+of the `::before`-only block and up into the shared
+`.bg-hero-pattern::before, .bg-hero-pattern::after` rule, so **both**
+decorative hero layers dissolve well before the hero's bottom edge. Added
+a comment there stating the invariant, since this is the third seam caused
+by the same class of mistake: anything painted in the hero that survives
+to its last pixel row will read as a horizontal seam, because the next
+section has no counterpart layer.
+
+Verified at the boundary in light mode (hero bottom parked at 400px and
+again at 260px into the viewport — no step on the left) and in dark mode
+(where `::after` is `content: none` anyway). `npx eslint src --ext js,jsx`
+clean, `npm run build` green.
+
+**Navbar logo wrapped onto two lines**: at anything under ~1000px the
+logo rendered as "Khalid|  Developer ×" / "Security" — two lines, with the
+pipe glued straight onto "Khalid" and no gap.
+
+Two causes in the same element. The `<p>` was `display:flex`, holding a
+bare text node (`Khalid &nbsp;`) plus a `<span>` (` | &nbsp; Developer ×
+Security `). Flex made each an anonymous flex item, and flex items have
+their leading/trailing collapsible whitespace trimmed — so the space
+before the `|` disappeared while the `&nbsp;` after it survived, which is
+the lopsided "Khalid|  Developer" spacing. Separately, the span was the
+only thing in the bar that could shrink, so once the logo + five nav links
++ theme toggle stopped fitting, it wrapped internally rather than the bar
+overflowing.
+
+Measured the real widths in the page before changing anything: nav content
+row is `max-w-7xl` (1280px) inside `sm:px-16` (128px of padding), the logo
+`<Link>` is 318px with the full text and 104px without it, and the nav
+links + toggle are 549px at `gap-10` / 485px at `gap-6`.
+
+Fix, in `Navbar.jsx`:
+- Logo is now three spans in a `flex items-center gap-2 whitespace-nowrap`
+  paragraph, so spacing is symmetric and it can never wrap. The pipe got
+  `text-secondary font-normal` so it reads as a separator rather than part
+  of the name.
+- The `| Developer × Security` suffix is `hidden lg:inline` — shown from
+  1024px, where it fits with 80px of clearance.
+- Desktop nav row moved `sm:` → `md:` and the mobile block `sm:hidden` →
+  `md:hidden`, and the link list is now `gap-6 xl:gap-10`. This closes a
+  **pre-existing** overflow band (640–~690px, where the five links simply
+  did not fit) that the wrapping logo had been absorbing.
+
+Verified by loading the site into a same-origin iframe and sweeping its
+width — media queries evaluate against the iframe's width, so this checks
+real breakpoint behaviour without resizing the browser window. Across
+320 / 360 / 420 / 500 / 600 / 640 / 700 / 767 / 768 / 800 / 860 / 900 /
+960 / 1000 / 1024 / 1100 / 1280 / 1440 / 1920: logo is one line at every
+width, no nav overflow and no document overflow at any width, hamburger
+below 768 and the desktop row at/above it, suffix present at/above 1024.
+Also eyeballed in dark mode. `npx eslint src --ext js,jsx` clean,
+`npm run build` green.
+
+One tradeoff to be aware of: Khalid's own browser viewport is ~960 CSS px
+(200% Windows display scaling on a 1920px screen), which is below the
+1024 cutoff — so on *his* screen the logo now reads just "Khalid". Forcing
+the suffix on at 960px was measured too: it fits, but leaves only 16px
+between the logo and the "About" link, which is why the cutoff is 1024
+rather than something lower.
+
+**Light-mode starfield was almost invisible**: Khalid — *"now the
+background start motion on the dark mode is perfect keep it as it. but on
+the light mode, its almost unvisible fix that"*.
+
+`Stars.jsx` was theme-aware for colour only (`#915eff` light / `#f272c8`
+dark) and drew both at `size={0.002}`. That size is the real problem, not
+the colour: at sub-pixel size a *bright* dot on a dark field still reads
+as a glowing point, but the same dot on a near-white page gets averaged
+into the background and disappears. Contrast was never the issue —
+`#915eff` on the `#f7f5f1` page is already ~3.9:1.
+
+Light mode now gets a deeper violet (`#6d28d9`), a 1.75x larger point
+(`0.0035`) and `opacity 0.9`. Dark mode's branch is byte-equivalent to
+before: same `#f272c8`, same `0.002`, and the newly-explicit `opacity 1`
+is exactly what `PointMaterial` defaulted to.
+
+Verified by capturing the same background region (Work Experience, plain
+backdrop) at native resolution with the old values and the new ones: the
+"before" frame has perhaps three perceptible dots in a 600x300 region,
+the "after" frame reads as an actual starfield. Dark mode re-checked
+after the change and is unchanged. `npx eslint src --ext js,jsx` clean,
+`npm run build` green.
+
+Worth knowing for next time: the light starfield now reads slightly
+bolder than the dark one rather than matching its delicacy. That was a
+deliberate bias toward "clearly visible" given the complaint — if it
+looks too busy, drop `size` to `0.003` and `opacity` to `0.75` rather
+than touching the colour.
+
+**Light-mode starfield, second pass** — Khalid on the first pass: *"make
+it match the dark mode delicacy, less busy and its too purpuly try to
+have so diversity in color like the one on the dark mode it seems like
+actual stars in the outer space"*.
+
+The first pass had only made the dots bigger and deeper, which fixed
+visibility but left a field of ~1700 identical violet dots at identical
+weight — uniform, and the only hue on the page. Dark mode doesn't look
+like that because a bright dot on a dark field varies naturally with
+sub-pixel coverage; it reads as depth for free.
+
+So light mode now carries *per-point* colour: `Points` gets a `colors`
+buffer attribute (drei's `PointsBuffer` attaches it as `attributes-color`)
+and `PointMaterial` gets `vertexColors`, with `color` left white so it
+acts as a neutral multiplier. Each point draws from a weighted palette —
+44% warm ink `#2f2a24`, then 14% each of `#6d28d9` / `#0d9488` /
+`#b45309` / `#be185d` (deepened dev / security / infra / AI accents; the
+CATEGORY values themselves are tuned for dark surfaces and wash out on
+the warm page). The ink is deliberately the plain majority: it plays the
+role "white" plays in a real starfield, with the tinted ones sprinkled
+through.
+
+Brightness is bimodal rather than a smooth ramp: ~40% of points sit crisp
+(0–12% faded toward the page colour) and ~60% sit back at 35–65% faded.
+That is what answers both "less busy" and "more delicate" at once — about
+40% fewer prominent dots than the flat field, with the faint majority
+providing depth instead of evenly-spaced confetti.
+
+Dark mode's branch is untouched: `#f272c8`, `size 0.002`, `vertexColors`
+false.
+
+Three things worth remembering, all now commented in the file:
+
+1. **Don't fade with `THREE.Color.lerp`.** `THREE.Color` holds
+   linear-light values once colour management converts the hex, and
+   lerping there toward a near-white background collapses almost
+   immediately — a 50% linear mix is visually ~75% of the way to white.
+   The first attempt at this did exactly that and made the whole field
+   disappear. Mixing the gamma-encoded bytes and re-parsing the hex keeps
+   `fade` meaning what it looks like it means.
+2. **The material needs a `key` on the theme.** `vertexColors` is a
+   shader-define; flipping it on a live material needs a recompile.
+3. **The positions were being regenerated every render.** `random.inSphere`
+   ran in the render body, so a theme toggle visibly reshuffled every
+   star — and would have unpaired the colours from the positions. Both
+   arrays are `useMemo`'d now.
+
+Verification note, honestly: this pass could NOT be checked with the
+browser tools. The Chrome window holding the automation tab was in the
+background, so `requestAnimationFrame` never fires and React Three Fiber
+never renders or even sizes its canvases (they sit at the 300x150
+default, `document.visibilityState === "hidden"`). Every screenshot taken
+during this pass was a stale or blank frame — proven by setting every
+star to full strength and still screenshotting an empty page. The values
+were reasoned from the first pass's known-good baseline instead, and
+**Khalid confirmed the result by eye** before this was committed.
+`npx eslint src --ext js,jsx` clean, `npm run build` green.

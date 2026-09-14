@@ -63,19 +63,22 @@ const Hero = () => {
           instead of floating on top of the keyboard. That band is what caps the
           indicator's size — it has to stay shorter than the clearance, or it
           overlaps the desk again on shorter viewports. */}
-      <div className="absolute xs:bottom-2 bottom-32 w-full flex justify-center items-center">
-        <a href="#about">
+      <div className="absolute xs:bottom-0 bottom-32 w-full flex justify-center items-center">
+        {/* The p-2 is hit-area, not spacing: it grows the tap target to 42x52
+            around the 26x36 pill without moving it, which is why the wrapper
+            sits at bottom-0 rather than bottom-2. */}
+        <a href="#about" aria-label="Scroll to the About section" className="block p-2">
           <div className="w-[26px] h-[36px] rounded-3xl border-[3px] border-secondary flex justify-center items-start p-1">
             <motion.div
             animate={{
-              y: [0, 12, 0]
+              y: [0, 11, 0]
             }}
             transition={{
               duration: 1.5,
               repeat: Infinity,
               repeatType: 'loop'
             }}
-            className="w-1.5 h-1.5 rounded-full bg-secondary mb-1"
+            className="w-[5px] h-[9px] rounded-full bg-secondary"
             />
           </div>
         </a>

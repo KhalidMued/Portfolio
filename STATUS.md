@@ -1,6 +1,6 @@
 # Status
 
-Last updated: 2026-09-13
+Last updated: 2026-09-14
 
 ## Where things stand
 
@@ -14,9 +14,10 @@ feedback while looking at the live site.
 **We are currently paused mid-review**, going section by section through the
 live site for visual/UX feedback. Sections reviewed and fixed so far: Hero,
 About ("Two Sides" block + the 6 service cards), Experience (timeline
-icons). Nothing is known to be broken right now. The next step is whichever
-section Khalid raises next — Skills, Works, Highlights, Contact,
-Credentials, and Navbar haven't had a dedicated feedback pass yet.
+icons), Navbar (logo wrap / responsive breakpoints). Nothing is known to be
+broken right now. The next step is whichever section Khalid raises next —
+Skills, Works, Highlights, Contact and Credentials haven't had a dedicated
+feedback pass yet.
 
 ## Content status
 
@@ -48,9 +49,11 @@ Known gaps:
   colors for future sections.
 - `.glass-card` utility (in `src/index.css`) — frosted glass card style,
   theme-aware, currently used only by the About "Two Sides" cards.
-- Light theme is a true neutral cool-gray scale now (bg `#f8f9fb`, ink text
-  `#0f1218`, panels `#f0f1f4`/`#e7e9ed`) — NOT lavender-tinted. Any new
-  hardcoded light-mode color should stay neutral; let `CATEGORY`'s
+- Light theme is a warm neutral scale (page bg `#f7f5f1`, warm-ivory cards
+  `#fffbf4` — deliberately brighter and warmer than the page — warm ink
+  text `#1a1612`) — NOT lavender-tinted, and no longer the cool-gray of the
+  first pass either. Any new hardcoded light-mode color should stay in that
+  warm neutral family; let `CATEGORY`'s
   violet/teal/amber/pink be the only color, used on purpose (badges,
   buttons, category-tinted borders/glows), not baked into "neutral" tokens.
 - Custom inline-SVG project cover art
@@ -158,6 +161,62 @@ Known gaps:
     (`35x64` → `26x36`, thinner border, smaller dot, shorter travel) — 44px
     total, so it still clears on viewports down to ~650px tall. Mobile's
     offset (`bottom-32`) is untouched.
+16. Hero scroll indicator was only clickable along its top few pixels —
+    caused by `.hash-span`, the invisible scroll-anchor offset spacer that
+    every `SectionWrapper` section renders. It's ~124px tall and pulled up
+    100px into the PREVIOUS section, and since each section is `relative
+    z-0` it painted above the hero and swallowed clicks in that band.
+    Fixed at the root with `pointer-events: none` on `.hash-span`, which
+    also clears the same dead zone in the bottom ~100px of every other
+    section. The indicator also got a 42x52 tap target (padding on the
+    anchor, offset compensated so it doesn't move) and a bigger oval
+    "wheel" (`w-[5px] h-[9px]`).
+17. Hero/About seam, final cause (light mode, LEFT side only). The hero's
+    contrast scrim `.bg-hero-pattern::after` is a radial gradient centred
+    at 22% across and had no mask, so it painted at full strength right up
+    to the hero's last pixel row on the left and stopped dead there. On
+    the right it had already faded to zero, so that side matched — which
+    is exactly the asymmetry Khalid described. Fixed by moving the
+    `mask-image` from the `::before`-only rule up into the shared
+    `::before, ::after` rule so both decorative layers fade out by 75% of
+    the hero's height. **Invariant to remember** (three seams have now
+    come from breaking it): anything painted inside the hero that reaches
+    its bottom edge will read as a horizontal line, because the section
+    below has no counterpart layer.
+18. Navbar logo wrapped onto two lines ("Khalid|  Developer ×" /
+    "Security") with the pipe glued to "Khalid". The `<p>` was
+    `display:flex` with `&nbsp;`-based spacing, so the separator spacing
+    collapsed and the suffix span wrapped internally whenever the bar ran
+    out of room. Rewritten as three spans with `gap-2` +
+    `whitespace-nowrap`; the "| Developer × Security" suffix now shows
+    only from `lg` (1024px) up, where it measurably fits. Also moved the
+    desktop nav row from `sm:` to `md:` (so the hamburger now covers
+    640–767px) and made the link gap `gap-6 xl:gap-10` — that closes a
+    **pre-existing** overflow band the wrapping had been masking.
+    Measured across 320–1920px: one line everywhere, no overflow
+    anywhere. Tradeoff worth knowing: at Khalid's own ~960px CSS viewport
+    (200% Windows scaling on a 1920px screen) the logo now reads just
+    "Khalid" — forcing the suffix on at that width leaves only 16px
+    between the logo and "About", which is why the cutoff is 1024.
+19. Global starfield was almost invisible in light mode. Both themes were
+    drawing the same `size={0.002}` points, and at that size a bright dot
+    on a dark field reads as a glowing point while the same dot on a
+    near-white page averages away to nothing. Fixed in two passes — the
+    first just made it visible (one deeper violet at `0.0035`), which
+    Khalid then called too busy, too purply, and less delicate than dark
+    mode. **Current state**: light mode draws *per-point* colours through
+    a `color` buffer attribute + `vertexColors`, from a weighted palette
+    (44% warm ink `#2f2a24`, then 14% each of deepened dev violet,
+    security teal, infra amber and AI pink) with a bimodal brightness
+    split — ~40% crisp "near" stars, ~60% faded 35–65% toward the page
+    colour as background texture. **Dark mode is untouched** — Khalid
+    called it perfect, and its branch keeps `#f272c8` / `0.002` /
+    `vertexColors` off. Two gotchas live in that file's comments:
+    `THREE.Color.lerp` mixes in *linear* space (a 50% mix toward a
+    near-white bg is already ~75% of the way there, which collapses every
+    faded star — mix the gamma-encoded bytes instead), and the material
+    carries a `key` on the theme because `vertexColors` is a
+    shader-define that needs a recompile to flip.
 
 ## Git state
 
@@ -167,10 +226,14 @@ https://github.com/KhalidMued/Portfolio/pull/7
 
 Khalid's workflow for this repo is one PR per change, squash-merged into
 `main` (every commit on `main` is a `(#N)` squash). So: branch off an
-up-to-date `origin/main`, commit there, push, open a PR — don't commit
-straight to `main`, and don't keep reusing a branch whose PR has already
-been merged (GitHub deletes the branch on merge, and the local copy's
-history goes stale against the squashed commit).
+up-to-date `origin/main` and commit there — don't commit straight to
+`main`, and don't keep reusing a branch whose PR has already been merged
+(GitHub deletes the branch on merge, and the local copy's history goes
+stale against the squashed commit).
+
+**Stop at the commit.** Khalid verifies the change himself first, then
+asks for the PR. Do not run `gh pr create`, and do not push a branch,
+unless he asked for it in that exchange — see CLAUDE.md.
 
 ## Open / not yet addressed
 
@@ -183,6 +246,15 @@ history goes stale against the squashed commit).
 - No automated tests exist. Verification has been manual, in-browser
   (via the `claude-in-chrome` tools + a local dev server), each time a
   change is made.
+- Browser-tooling note: screenshots come back blank/cropped whenever the
+  Chrome window holding the automation tab isn't the foreground window
+  (`document.visibilityState === "hidden"`). Ask Khalid to bring the
+  `localhost:5173` tab to the front. `javascript_tool` still works on a
+  hidden tab, but **timers are throttled** there — use synchronous
+  measurement (set a size, force reflow by reading `offsetWidth`, then
+  measure), not `setTimeout`. For responsive checks without resizing the
+  window, load the site into a same-origin `<iframe>` and vary its width:
+  media queries evaluate against the iframe's own width.
 
 ## How to resume if this session is lost
 
