@@ -1152,3 +1152,37 @@ Not visually verified — the canvas never renders in this backgrounded
 browser (it sits at the unsized 300x150 default), so the numbers come
 from the CSS box measurements and the camera maths, not from looking.
 Worth an eyeball on a phone.
+
+**Hero desk model shrunk on phones only** (`Computers.jsx`).
+
+The ternary read `scale={isMobile ? 0.75 : 0.75}` — the mobile branch had
+existed all along but was never given its own value, so phones drew the
+desk at exactly the desktop size. (The `position` branch beside it *was*
+differentiated, which is probably how it went unnoticed.)
+
+Why that reads as oversized: the camera is fixed at 25° vertical, so how
+much of the desk fits across the frame depends entirely on the hero's
+aspect ratio — and the hero is a completely different shape on a phone.
+Measured:
+
+| Layout | Hero box | Aspect | Horizontal room | vs desktop |
+| --- | --- | --- | --- | --- |
+| 360 phone | 345x780 | 0.442 | 4.08 units | 31% |
+| 390 phone | 375x844 | 0.444 | 4.10 units | 32% |
+| 430 phone | 415x932 | 0.445 | 4.11 units | 32% |
+| md 768 | 753x1024 | 0.735 | 6.79 units | 52% |
+| desktop 1280 | 1265x900 | 1.406 | 12.99 units | 100% |
+
+A phone has under a third of the width to work with while drawing the
+model at full size. Scaling strictly in proportion would mean ~0.24 and a
+speck of a desk — the hero deliberately wants it large and slightly
+overflowing as a backdrop — so `0.6` is a measured step down rather than
+a proportional one.
+
+Desktop is untouched: the existing `matchMedia('(max-width: 500px)')`
+gate already separates phones from `md` upward, so 768 and 1280 keep
+0.75. Confirmed in the built chunk: `h=.6,u=.75` with `scale:s?h:u`.
+
+Not visually verified, same reason as the globe — the canvas never
+renders in this backgrounded browser. If 0.6 is now too small, 0.65 is
+the next step; the constants are named at the top of the file.
