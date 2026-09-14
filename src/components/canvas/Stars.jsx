@@ -7,6 +7,7 @@ import { useTheme } from '../../context/ThemeContext';
 
 const Stars = ({ theme, ...props }) => {
   const ref= useRef();
+  const isLight = theme === 'light';
 
   const sphere = random.inSphere(new Float32Array (5000), { radius: 1.2 })
 
@@ -18,10 +19,14 @@ const Stars = ({ theme, ...props }) => {
   return (
     <group rotation={[0, 0, Math.PI / 4]}>
       <Points ref={ref} positions={sphere} stride={3} frustumCulled {...props}>
+        {/* Light mode needs bigger, deeper dots: a bright dot on a dark
+            field reads as a glowing point, but the same dot on a near-white
+            page averages away to nothing. Dark mode is tuned and stays put. */}
         <PointMaterial
         transparent
-        color={theme === 'light' ? '#915eff' : '#f272c8'}
-        size={0.002}
+        color={isLight ? '#6d28d9' : '#f272c8'}
+        size={isLight ? 0.0035 : 0.002}
+        opacity={isLight ? 0.9 : 1}
         sizeAttenuation={true}
         depthWrite={false}
         />

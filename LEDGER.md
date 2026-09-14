@@ -481,3 +481,32 @@ One tradeoff to be aware of: Khalid's own browser viewport is ~960 CSS px
 the suffix on at 960px was measured too: it fits, but leaves only 16px
 between the logo and the "About" link, which is why the cutoff is 1024
 rather than something lower.
+
+**Light-mode starfield was almost invisible**: Khalid — *"now the
+background start motion on the dark mode is perfect keep it as it. but on
+the light mode, its almost unvisible fix that"*.
+
+`Stars.jsx` was theme-aware for colour only (`#915eff` light / `#f272c8`
+dark) and drew both at `size={0.002}`. That size is the real problem, not
+the colour: at sub-pixel size a *bright* dot on a dark field still reads
+as a glowing point, but the same dot on a near-white page gets averaged
+into the background and disappears. Contrast was never the issue —
+`#915eff` on the `#f7f5f1` page is already ~3.9:1.
+
+Light mode now gets a deeper violet (`#6d28d9`), a 1.75x larger point
+(`0.0035`) and `opacity 0.9`. Dark mode's branch is byte-equivalent to
+before: same `#f272c8`, same `0.002`, and the newly-explicit `opacity 1`
+is exactly what `PointMaterial` defaulted to.
+
+Verified by capturing the same background region (Work Experience, plain
+backdrop) at native resolution with the old values and the new ones: the
+"before" frame has perhaps three perceptible dots in a 600x300 region,
+the "after" frame reads as an actual starfield. Dark mode re-checked
+after the change and is unchanged. `npx eslint src --ext js,jsx` clean,
+`npm run build` green.
+
+Worth knowing for next time: the light starfield now reads slightly
+bolder than the dark one rather than matching its delicacy. That was a
+deliberate bias toward "clearly visible" given the complaint — if it
+looks too busy, drop `size` to `0.003` and `opacity` to `0.75` rather
+than touching the colour.

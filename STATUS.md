@@ -198,6 +198,14 @@ Known gaps:
     (200% Windows scaling on a 1920px screen) the logo now reads just
     "Khalid" — forcing the suffix on at that width leaves only 16px
     between the logo and "About", which is why the cutoff is 1024.
+19. Global starfield was almost invisible in light mode. Both themes were
+    drawing the same `size={0.002}` points, and at that size a bright dot
+    on a dark field reads as a glowing point while the same dot on a
+    near-white page averages away to nothing. Light mode now uses a
+    deeper violet (`#6d28d9` instead of `#915eff`), a 1.75x larger point
+    (`0.0035`) and `opacity 0.9`. **Dark mode is untouched** — Khalid
+    called it perfect, and its branch keeps `#f272c8` / `0.002` /
+    opacity 1 (which was the implicit default before).
 
 ## Git state
 
