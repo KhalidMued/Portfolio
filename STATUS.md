@@ -1,6 +1,6 @@
 # Status
 
-Last updated: 2026-09-13
+Last updated: 2026-09-14
 
 ## Where things stand
 
@@ -48,9 +48,11 @@ Known gaps:
   colors for future sections.
 - `.glass-card` utility (in `src/index.css`) — frosted glass card style,
   theme-aware, currently used only by the About "Two Sides" cards.
-- Light theme is a true neutral cool-gray scale now (bg `#f8f9fb`, ink text
-  `#0f1218`, panels `#f0f1f4`/`#e7e9ed`) — NOT lavender-tinted. Any new
-  hardcoded light-mode color should stay neutral; let `CATEGORY`'s
+- Light theme is a warm neutral scale (page bg `#f7f5f1`, warm-ivory cards
+  `#fffbf4` — deliberately brighter and warmer than the page — warm ink
+  text `#1a1612`) — NOT lavender-tinted, and no longer the cool-gray of the
+  first pass either. Any new hardcoded light-mode color should stay in that
+  warm neutral family; let `CATEGORY`'s
   violet/teal/amber/pink be the only color, used on purpose (badges,
   buttons, category-tinted borders/glows), not baked into "neutral" tokens.
 - Custom inline-SVG project cover art
@@ -168,6 +170,18 @@ Known gaps:
     section. The indicator also got a 42x52 tap target (padding on the
     anchor, offset compensated so it doesn't move) and a bigger oval
     "wheel" (`w-[5px] h-[9px]`).
+17. Hero/About seam, final cause (light mode, LEFT side only). The hero's
+    contrast scrim `.bg-hero-pattern::after` is a radial gradient centred
+    at 22% across and had no mask, so it painted at full strength right up
+    to the hero's last pixel row on the left and stopped dead there. On
+    the right it had already faded to zero, so that side matched — which
+    is exactly the asymmetry Khalid described. Fixed by moving the
+    `mask-image` from the `::before`-only rule up into the shared
+    `::before, ::after` rule so both decorative layers fade out by 75% of
+    the hero's height. **Invariant to remember** (three seams have now
+    come from breaking it): anything painted inside the hero that reaches
+    its bottom edge will read as a horizontal line, because the section
+    below has no counterpart layer.
 
 ## Git state
 

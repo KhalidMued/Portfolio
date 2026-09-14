@@ -388,3 +388,48 @@ the 22px inner track, and `mb-1` dropped. And the anchor got `block p-2`,
 which grows the tap target from 26x36 to 42x52 without moving the pill —
 the wrapper offset went `xs:bottom-2` → `xs:bottom-0` to compensate, so
 the pill still sits 8px above the hero's bottom edge exactly as before.
+
+## 2026-09-14
+
+**The last of the Hero/About seam (light mode, left side only)**: Khalid
+spotted what the previous two seam fixes had missed and diagnosed it
+himself — *"on the right section of the page there is a light green-ish
+color that breaks the color difference with the top section, but its not
+on the left side, that's why on the left side I see a line of color
+difference"*. That asymmetry was the whole clue.
+
+The culprit was `.bg-hero-pattern::after`, the hero's contrast scrim:
+`radial-gradient(circle at 22% 38%, rgba(255,251,244,0.75),
+rgba(255,251,244,0) 60%)`. Two properties of it combined:
+
+- Its centre sits at **22% across**, so it's bright on the left and has
+  already faded to zero by the right-hand side of the page.
+- Unlike the `::before` starfield layer, it carried **no mask**, so it was
+  still painting at full local strength on the hero's very last pixel row
+  and then stopped dead — the section below has no equivalent layer.
+
+So the hero's bottom-left was ~0.5 alpha of warm ivory over the page
+colour and the section below it was the bare page colour: a hard step. On
+the right the scrim was already at zero, so both sides matched and no line
+appeared — which also explains why the teal half of `.page-depth`'s
+ambient wash (Khalid's "light green-ish color") seemed to be "fixing" that
+side. It wasn't; there was simply nothing to fix there.
+
+Confirmed before changing anything by injecting
+`.bg-hero-pattern::after { content: none !important }` into the live page
+— the left-hand line vanished.
+
+Fix: moved the `mask-image` / `-webkit-mask-image`
+(`linear-gradient(to bottom, black 0%, black 55%, transparent 75%)`) out
+of the `::before`-only block and up into the shared
+`.bg-hero-pattern::before, .bg-hero-pattern::after` rule, so **both**
+decorative hero layers dissolve well before the hero's bottom edge. Added
+a comment there stating the invariant, since this is the third seam caused
+by the same class of mistake: anything painted in the hero that survives
+to its last pixel row will read as a horizontal seam, because the next
+section has no counterpart layer.
+
+Verified at the boundary in light mode (hero bottom parked at 400px and
+again at 260px into the viewport — no step on the left) and in dark mode
+(where `::after` is `content: none` anyway). `npx eslint src --ext js,jsx`
+clean, `npm run build` green.
