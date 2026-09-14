@@ -235,11 +235,29 @@ https://github.com/KhalidMued/Portfolio/pull/10 — working tree clean, no
 local branch ahead of `origin/main`. The main redesign before that was
 PR #7, squashed as `3abded2`.
 
-**Deployment**: the site runs on Cloudflare Workers at
-https://portfolio.khalid-mued.workers.dev, deployed with a bare
+**Deployment**: the site runs on Cloudflare Workers, deployed with a bare
 `npx wrangler deploy` (no flags — `wrangler.jsonc` carries everything).
-The contact Worker went live from the `feat/contact-worker-resend` branch
-before PR #12 merged, so production may be ahead of `main` until it does.
+PR #12 is merged, so `main` and production match.
+
+Three hostnames answer, all serving the identical build from the same
+Worker:
+
+| Hostname | Role |
+| --- | --- |
+| `https://khalidmued.com` | **primary / canonical** |
+| `https://portfolio.khalidmued.com` | alternate, kept working on purpose |
+| `https://portfolio.khalid-mued.workers.dev` | Cloudflare's default |
+
+There is deliberately **no redirect** between them. Canonicalisation is
+done with the `canonical` / `og:url` tags in `index.html`, which point at
+the apex from every hostname — verified by fetching all three and
+comparing. `www.khalidmued.com` has no DNS records and is intentionally
+left that way.
+
+The hostnames are Cloudflare Custom Domains managed **in the dashboard**,
+not declared as `routes` in `wrangler.jsonc`. That's deliberate: a deploy
+reconciles the Worker's route list, so declaring a partial list risks
+silently detaching a hostname that isn't in the file.
 
 Khalid's workflow for this repo is one PR per change, squash-merged into
 `main` (every commit on `main` is a `(#N)` squash). So: branch off an
@@ -277,12 +295,17 @@ unless he asked for it in that exchange — see CLAUDE.md.
   the variable name and value length printed the whole line instead.
   Rotate in the Resend dashboard, update `.dev.vars`, re-run
   `npx wrangler secret put RESEND_API_KEY`, and redeploy. No code change.
-- **`khalidmued.com` does not resolve.** The zone exists but the apex has
-  no A/AAAA/CNAME record and `www` doesn't exist at all
-  (`Resolve-DnsName` returns SOA only). `index.html`'s `canonical` and
-  `og:url` both point there, so link previews and SEO currently reference
-  a dead host. Verifying that domain in Resend would also lift the
-  "delivery only to the account's own address" restriction.
+- **The OG card is live** at https://khalidmued.com/og-card.png (200,
+  `image/png`, byte-identical to `public/og-card.png`) and the live HTML
+  carries the tags. Remaining step is Khalid's: LinkedIn, X and Facebook
+  cache previews hard and may already hold the old imageless result, so
+  force a re-scrape in LinkedIn's Post Inspector and X's Card Validator
+  rather than trusting what a first paste shows.
+- **Resend is still on the shared `onboarding@resend.dev` sender.** Now
+  that `khalidmued.com` resolves, verifying it in Resend would allow
+  sending from that domain, lift the "delivery only to the Resend
+  account's own address" restriction on `CONTACT_TO_EMAIL`, and stop the
+  contact mail riding a shared sender's reputation.
 - Broader "too purply" feedback — only addressed in the About section so
   far. Khalid may want more color variety elsewhere (Hero, Navbar, Works,
   etc.) — ask before doing a wider recolor.

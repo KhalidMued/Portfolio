@@ -722,3 +722,108 @@ Outstanding: rotate the Resend API key (see STATUS.md). Also still true —
 `khalidmued.com` has no DNS records, so the canonical/og URLs in
 `index.html` point at a host that doesn't resolve while the site actually
 lives on the workers.dev subdomain.
+
+**`khalidmued.com` is live and is now the primary/canonical URL.** Khalid
+sorted out the Cloudflare Custom Domain; both the apex and
+`portfolio.khalidmued.com` now resolve to Cloudflare and serve the Worker.
+
+Verified rather than assumed, because the local resolver lied about it:
+this machine had cached the earlier NXDOMAIN, so Chrome and `curl` both
+kept reporting `ERR_NAME_NOT_RESOLVED` / `Could not resolve host` well
+after the records existed. Querying Cloudflare's authoritative servers
+directly showed the records, and `curl --resolve` pinned to the returned
+IP proved the site was actually serving. Worth remembering: after a DNS
+fix, a negative cache on the machine you're testing from will happily
+tell you nothing changed.
+
+End state, all confirmed by fetching each hostname:
+
+| Hostname | Result |
+| --- | --- |
+| `https://khalidmued.com` | 200, valid TLS, build `index-571efeb5.js` |
+| `https://portfolio.khalidmued.com` | 200, valid TLS, same build |
+| `https://portfolio.khalid-mued.workers.dev` | 200, still answering |
+
+`/api/contact` returns 405 on GET from the apex and the alternate, which
+confirms the Worker is reached on both rather than the SPA fallback
+swallowing the path.
+
+No code change was needed for the canonicalisation: `index.html` already
+declared `https://khalidmued.com/` in `canonical`, `og:url`, `og:image`
+and `twitter:image` — those tags were written before the domain worked,
+and are simply true now. Both hostnames serve those same tags, so the
+alternate defers to the apex without a redirect, which is what was asked
+for.
+
+Deliberately not done: no `routes` block was added to `wrangler.jsonc`.
+Declaring custom domains there would make deploys reconcile the Worker's
+route list against the file, which risks detaching a hostname that isn't
+written down — exactly the "don't touch any other subdomains or wildcard
+routes" constraint. The domains stay dashboard-managed and this is now
+noted in CLAUDE.md so nobody "fixes" it later. `www.khalidmued.com` still
+has no records and was left alone.
+
+New open item found while checking: `og:image` points at an **SVG**. The
+URL serves fine, but LinkedIn, X, Facebook, Slack and WhatsApp won't
+render an SVG preview — that needs a raster card, usually PNG at
+1200x630.
+
+**Built a real OG card.** `og:image` and `twitter:image` pointed at
+`/logo.svg`. The URL served fine, but LinkedIn, X, Facebook, Slack and
+WhatsApp all ignore SVG for previews — they want a raster image, laid out
+in a 1.91:1 box — so the card rendered with no thumbnail at all. A square
+logo would also have been letterboxed there even as a PNG.
+
+`scripts/generate-og-card.mjs` now draws a 1200x630 card with
+`@napi-rs/canvas` (added as a devDependency) and writes
+`public/og-card.png`. Committing a generator rather than a hand-made file
+means the card can be edited later without hunting for whatever tool made
+it.
+
+The design pulls straight from the site so the two read as one thing: the
+dark `#050816` ground, violet/teal/amber/pink from
+`src/constants/categories.js`, Poppins at the same weights the site loads,
+a seeded starfield echoing `StarsCanvas`, the hero's concentric arc line
+art, and the two-colour role line ("Developer." violet, "Network &
+Security Engineer." teal) that states the positioning at a glance. A
+topology mesh sits over the arcs for the network half, a gradient bar
+across the top edge, category chips along the bottom.
+
+Details worth keeping:
+
+- The starfield is **seeded**, so regenerating an unchanged design
+  produces a byte-identical PNG. Verified by hashing across two runs.
+  Without that, every run would be a fresh binary diff.
+- The topology node coordinates are absolute and deliberately confined to
+  x > 840, y < 470 — the only region no text occupies. The first version
+  used polar coordinates and dropped nodes on top of "Engineer." and the
+  "AI & Automation" chip.
+- Google Fonts serves woff2 to modern browsers and plain TTF to old ones,
+  and `@napi-rs/canvas` needs the TTF — hence the deliberately ancient
+  `User-Agent` in the fetch. Fonts cache to `.cache/og-fonts/`
+  (gitignored).
+- Use `new Uint8Array(await res.arrayBuffer())` rather than `Buffer.from`:
+  the repo's ESLint config has no Node globals, so `Buffer` trips
+  `no-undef`.
+
+`index.html` also gained `og:image:type`, `:width`, `:height`, `:alt`,
+`twitter:image:alt`, `og:site_name` and `og:locale` — the dimensions in
+particular let crawlers lay the card out before the image finishes
+downloading.
+
+Verified: lint clean including `scripts/`, `npm run build` green, the PNG
+ships to `dist/og-card.png`, its header reads 1200x630, and the built
+HTML carries the new tags. Not yet live — previews won't change until a
+deploy, and the crawlers cache, so re-scrape after deploying.
+
+**Deployed; PR #13 opened.** Version `f4d81706-ca10-440b-bb49-9b66def83050`.
+Verified against the live site rather than the build directory: the card
+serves from `https://khalidmued.com/og-card.png` as `200 image/png`, and
+its SHA-256 matches `public/og-card.png` exactly, so what crawlers fetch
+is the file in the repo. The live HTML on the apex carries `og:image`
+plus `:type`, `:width`, `:height`, `:alt` and `twitter:image`, and the
+card is reachable on `portfolio.khalidmued.com` too.
+
+Left for Khalid: LinkedIn, X and Facebook may already have cached the old
+imageless preview, so those need a forced re-scrape (Post Inspector /
+Card Validator) before the new card shows up in a paste.

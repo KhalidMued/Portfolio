@@ -29,12 +29,23 @@
     <meta property="og:url" content="https://khalidmued.com/" />
     <meta property="og:title" content="Khalid Mohamed | Developer & Network Security Engineer" />
     <meta property="og:description" content="Developer and Network & Security Engineer — building apps, securing networks, and running the infrastructure between them." />
-    <meta property="og:image" content="https://khalidmued.com/logo.svg" />
+    <!-- A raster card, not logo.svg: every link-preview crawler (LinkedIn, X,
+         Facebook, Slack, WhatsApp) ignores SVG and renders no image at all.
+         1200x630 is the 1.91:1 box they lay the card out in. Regenerate with
+         `npm run og:card` — see scripts/generate-og-card.mjs. -->
+    <meta property="og:image" content="https://khalidmued.com/og-card.png" />
+    <meta property="og:image:type" content="image/png" />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:image:alt" content="Khalid Mohamed — Developer and Network &amp; Security Engineer. I build the apps people use, and the infrastructure they depend on." />
+    <meta property="og:site_name" content="Khalid Mohamed" />
+    <meta property="og:locale" content="en_US" />
     <!-- Twitter -->
     <meta name="twitter:card" content="summary_large_image" />
     <meta name="twitter:title" content="Khalid Mohamed | Developer & Network Security Engineer" />
     <meta name="twitter:description" content="Developer and Network & Security Engineer — building apps, securing networks, and running the infrastructure between them." />
-    <meta name="twitter:image" content="https://khalidmued.com/logo.svg" />
+    <meta name="twitter:image" content="https://khalidmued.com/og-card.png" />
+    <meta name="twitter:image:alt" content="Khalid Mohamed — Developer and Network &amp; Security Engineer." />
     <title> Khalid Mohamed | Developer & Network Security Engineer </title>
   </head>
   <body>
