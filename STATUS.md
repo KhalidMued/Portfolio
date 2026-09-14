@@ -295,11 +295,12 @@ unless he asked for it in that exchange — see CLAUDE.md.
   the variable name and value length printed the whole line instead.
   Rotate in the Resend dashboard, update `.dev.vars`, re-run
   `npx wrangler secret put RESEND_API_KEY`, and redeploy. No code change.
-- **The OG card is built but not deployed yet.** `public/og-card.png`
-  exists and the tags point at it, but link previews won't change until
-  the site is redeployed — crawlers read the live HTML, and several of
-  them cache aggressively, so re-scrape in LinkedIn's Post Inspector /
-  X's Card Validator after deploying rather than trusting the first try.
+- **The OG card is live** at https://khalidmued.com/og-card.png (200,
+  `image/png`, byte-identical to `public/og-card.png`) and the live HTML
+  carries the tags. Remaining step is Khalid's: LinkedIn, X and Facebook
+  cache previews hard and may already hold the old imageless result, so
+  force a re-scrape in LinkedIn's Post Inspector and X's Card Validator
+  rather than trusting what a first paste shows.
 - **Resend is still on the shared `onboarding@resend.dev` sender.** Now
   that `khalidmued.com` resolves, verifying it in Resend would allow
   sending from that domain, lift the "delivery only to the Resend

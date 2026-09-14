@@ -815,3 +815,15 @@ Verified: lint clean including `scripts/`, `npm run build` green, the PNG
 ships to `dist/og-card.png`, its header reads 1200x630, and the built
 HTML carries the new tags. Not yet live — previews won't change until a
 deploy, and the crawlers cache, so re-scrape after deploying.
+
+**Deployed; PR #13 opened.** Version `f4d81706-ca10-440b-bb49-9b66def83050`.
+Verified against the live site rather than the build directory: the card
+serves from `https://khalidmued.com/og-card.png` as `200 image/png`, and
+its SHA-256 matches `public/og-card.png` exactly, so what crawlers fetch
+is the file in the repo. The live HTML on the apex carries `og:image`
+plus `:type`, `:width`, `:height`, `:alt` and `twitter:image`, and the
+card is reachable on `portfolio.khalidmued.com` too.
+
+Left for Khalid: LinkedIn, X and Facebook may already have cached the old
+imageless preview, so those need a forced re-scrape (Post Inspector /
+Card Validator) before the new card shows up in a paste.
