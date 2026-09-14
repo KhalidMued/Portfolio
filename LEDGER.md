@@ -510,3 +510,61 @@ bolder than the dark one rather than matching its delicacy. That was a
 deliberate bias toward "clearly visible" given the complaint — if it
 looks too busy, drop `size` to `0.003` and `opacity` to `0.75` rather
 than touching the colour.
+
+**Light-mode starfield, second pass** — Khalid on the first pass: *"make
+it match the dark mode delicacy, less busy and its too purpuly try to
+have so diversity in color like the one on the dark mode it seems like
+actual stars in the outer space"*.
+
+The first pass had only made the dots bigger and deeper, which fixed
+visibility but left a field of ~1700 identical violet dots at identical
+weight — uniform, and the only hue on the page. Dark mode doesn't look
+like that because a bright dot on a dark field varies naturally with
+sub-pixel coverage; it reads as depth for free.
+
+So light mode now carries *per-point* colour: `Points` gets a `colors`
+buffer attribute (drei's `PointsBuffer` attaches it as `attributes-color`)
+and `PointMaterial` gets `vertexColors`, with `color` left white so it
+acts as a neutral multiplier. Each point draws from a weighted palette —
+44% warm ink `#2f2a24`, then 14% each of `#6d28d9` / `#0d9488` /
+`#b45309` / `#be185d` (deepened dev / security / infra / AI accents; the
+CATEGORY values themselves are tuned for dark surfaces and wash out on
+the warm page). The ink is deliberately the plain majority: it plays the
+role "white" plays in a real starfield, with the tinted ones sprinkled
+through.
+
+Brightness is bimodal rather than a smooth ramp: ~40% of points sit crisp
+(0–12% faded toward the page colour) and ~60% sit back at 35–65% faded.
+That is what answers both "less busy" and "more delicate" at once — about
+40% fewer prominent dots than the flat field, with the faint majority
+providing depth instead of evenly-spaced confetti.
+
+Dark mode's branch is untouched: `#f272c8`, `size 0.002`, `vertexColors`
+false.
+
+Three things worth remembering, all now commented in the file:
+
+1. **Don't fade with `THREE.Color.lerp`.** `THREE.Color` holds
+   linear-light values once colour management converts the hex, and
+   lerping there toward a near-white background collapses almost
+   immediately — a 50% linear mix is visually ~75% of the way to white.
+   The first attempt at this did exactly that and made the whole field
+   disappear. Mixing the gamma-encoded bytes and re-parsing the hex keeps
+   `fade` meaning what it looks like it means.
+2. **The material needs a `key` on the theme.** `vertexColors` is a
+   shader-define; flipping it on a live material needs a recompile.
+3. **The positions were being regenerated every render.** `random.inSphere`
+   ran in the render body, so a theme toggle visibly reshuffled every
+   star — and would have unpaired the colours from the positions. Both
+   arrays are `useMemo`'d now.
+
+Verification note, honestly: this pass could NOT be checked with the
+browser tools. The Chrome window holding the automation tab was in the
+background, so `requestAnimationFrame` never fires and React Three Fiber
+never renders or even sizes its canvases (they sit at the 300x150
+default, `document.visibilityState === "hidden"`). Every screenshot taken
+during this pass was a stale or blank frame — proven by setting every
+star to full strength and still screenshotting an empty page. The values
+were reasoned from the first pass's known-good baseline instead, and
+**Khalid confirmed the result by eye** before this was committed.
+`npx eslint src --ext js,jsx` clean, `npm run build` green.

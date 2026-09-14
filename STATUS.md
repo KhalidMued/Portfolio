@@ -201,11 +201,22 @@ Known gaps:
 19. Global starfield was almost invisible in light mode. Both themes were
     drawing the same `size={0.002}` points, and at that size a bright dot
     on a dark field reads as a glowing point while the same dot on a
-    near-white page averages away to nothing. Light mode now uses a
-    deeper violet (`#6d28d9` instead of `#915eff`), a 1.75x larger point
-    (`0.0035`) and `opacity 0.9`. **Dark mode is untouched** — Khalid
+    near-white page averages away to nothing. Fixed in two passes — the
+    first just made it visible (one deeper violet at `0.0035`), which
+    Khalid then called too busy, too purply, and less delicate than dark
+    mode. **Current state**: light mode draws *per-point* colours through
+    a `color` buffer attribute + `vertexColors`, from a weighted palette
+    (44% warm ink `#2f2a24`, then 14% each of deepened dev violet,
+    security teal, infra amber and AI pink) with a bimodal brightness
+    split — ~40% crisp "near" stars, ~60% faded 35–65% toward the page
+    colour as background texture. **Dark mode is untouched** — Khalid
     called it perfect, and its branch keeps `#f272c8` / `0.002` /
-    opacity 1 (which was the implicit default before).
+    `vertexColors` off. Two gotchas live in that file's comments:
+    `THREE.Color.lerp` mixes in *linear* space (a 50% mix toward a
+    near-white bg is already ~75% of the way there, which collapses every
+    faded star — mix the gamma-encoded bytes instead), and the material
+    carries a `key` on the theme because `vertexColors` is a
+    shader-define that needs a recompile to flip.
 
 ## Git state
 
