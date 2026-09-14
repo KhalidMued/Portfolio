@@ -891,3 +891,62 @@ not the headline.
 Verified: lint clean, build green, the built HTML carries the new name in
 every tag, the string is in the JS bundle, and `dist/og-card.png` hashes
 identical to `public/og-card.png`.
+
+**iOS had no usable icon at all.** Khalid: *"why i get facebook icon on
+the favicon, when i open the site on my iphone"*.
+
+`index.html` declared exactly one icon —
+`<link rel="icon" type="image/svg+xml" href="/logo.svg">` — and nothing
+else. No `apple-touch-icon`, no `.ico`, no PNG, no manifest. And this is
+the third instance of the same trap: `not_found_handling:
+"single-page-application"` answers any path that isn't a real asset with
+`index.html`, so the files iOS probes for did not 404, they returned a
+**page of HTML with a 200**. Measured against the live site:
+
+| Path | Before |
+| --- | --- |
+| `/favicon.ico` | `200 text/html` |
+| `/apple-touch-icon.png` | `200 text/html` |
+| `/apple-touch-icon-precomposed.png` | `200 text/html` |
+| `/site.webmanifest` | `200 text/html` |
+
+iOS asks for the touch icon, gets markup, falls back to `favicon.ico`,
+gets markup again, and has nothing left — and it's historically
+unreliable with SVG-only favicons, so the one declared icon didn't
+rescue it.
+
+`scripts/generate-icons.mjs` (`npm run icons`) now rasterises `logo.svg`
+into the full set. Two decisions worth keeping:
+
+- Tab icons (`favicon.ico`, `favicon-32.png`) keep their transparency —
+  they sit on a tab strip whose colour the page doesn't control, and the
+  red mark reads on both light and dark.
+- Touch and manifest icons are **opaque** on `#050816`, and the mark is
+  inset 14%. iOS and Android place these on surfaces the page has no say
+  over and will composite transparency onto something unpredictable, and
+  iOS rounds the corners and crops.
+
+The `.ico` is hand-built: a 6-byte header, a 16-byte directory entry per
+image, then PNG payloads (PNG-in-ICO has been valid since Vista and every
+browser that still reads `.ico` understands it). Validated by parsing the
+file back — 3 entries, directory dimensions matching the embedded PNG
+headers, offsets in range. A 256px entry would encode its size as 0,
+which is why those fields are a single byte each; nothing here is that
+large.
+
+`apple-touch-icon-precomposed.png` is written as a byte-identical copy.
+Older iOS probes that name directly instead of reading the `<link>`, and
+without the file that probe hits the SPA fallback — the exact failure
+this script exists to end.
+
+Verified against `wrangler dev`: all eight icon paths return their real
+content types (`image/vnd.microsoft.icon`, `image/png`,
+`application/manifest+json`), and regenerating twice produces identical
+bytes.
+
+**On the Facebook icon specifically**: not reproducible from here and
+almost certainly not the site. The likeliest explanation is that the link
+was opened from inside the Facebook app, whose in-app browser shows
+Facebook's own icon in the iOS app switcher and share sheet. Asked
+Khalid where he opened it from. The missing icons were a real bug either
+way.

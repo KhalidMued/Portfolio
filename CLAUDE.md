@@ -50,6 +50,15 @@ color system ties it all together (see `src/constants/categories.js`).
 - `npm run build` — production build to `dist/`
 - `npm run preview` — serve the production build locally
 - `npm run lint` — ESLint
+- `npm run icons` — regenerates the favicon / touch-icon set in `public/`
+  from `public/logo.svg` (`favicon.ico`, `favicon-32.png`,
+  `apple-touch-icon.png` + the `-precomposed` alias, `icon-192/512.png`).
+  Run after changing the logo. Output is committed and deterministic.
+  **Every one of those filenames matters**: the SPA fallback answers any
+  path that isn't a real asset with `index.html`, so a missing icon file
+  is served as a 200 page of HTML rather than a 404 — which is exactly
+  why iOS had no usable icon before these existed. The same trap caught
+  `robots.txt`. If you add an icon `<link>`, add the file.
 - `npm run og:card` — regenerates `public/og-card.png`, the 1200x630
   link-preview image, from `scripts/generate-og-card.mjs`. The output is
   committed, so only run this when the card design changes. It's

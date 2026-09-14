@@ -9,7 +9,8 @@
     "lint": "eslint . --ext js,jsx --report-unused-disable-directives --max-warnings 0",
     "preview": "vite preview",
     "dev:worker": "wrangler dev",
-    "og:card": "node scripts/generate-og-card.mjs"
+    "og:card": "node scripts/generate-og-card.mjs",
+    "icons": "node scripts/generate-icons.mjs"
   },
   "dependencies": {
     "@react-three/drei": "^9.80.9",
