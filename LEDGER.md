@@ -722,3 +722,48 @@ Outstanding: rotate the Resend API key (see STATUS.md). Also still true —
 `khalidmued.com` has no DNS records, so the canonical/og URLs in
 `index.html` point at a host that doesn't resolve while the site actually
 lives on the workers.dev subdomain.
+
+**`khalidmued.com` is live and is now the primary/canonical URL.** Khalid
+sorted out the Cloudflare Custom Domain; both the apex and
+`portfolio.khalidmued.com` now resolve to Cloudflare and serve the Worker.
+
+Verified rather than assumed, because the local resolver lied about it:
+this machine had cached the earlier NXDOMAIN, so Chrome and `curl` both
+kept reporting `ERR_NAME_NOT_RESOLVED` / `Could not resolve host` well
+after the records existed. Querying Cloudflare's authoritative servers
+directly showed the records, and `curl --resolve` pinned to the returned
+IP proved the site was actually serving. Worth remembering: after a DNS
+fix, a negative cache on the machine you're testing from will happily
+tell you nothing changed.
+
+End state, all confirmed by fetching each hostname:
+
+| Hostname | Result |
+| --- | --- |
+| `https://khalidmued.com` | 200, valid TLS, build `index-571efeb5.js` |
+| `https://portfolio.khalidmued.com` | 200, valid TLS, same build |
+| `https://portfolio.khalid-mued.workers.dev` | 200, still answering |
+
+`/api/contact` returns 405 on GET from the apex and the alternate, which
+confirms the Worker is reached on both rather than the SPA fallback
+swallowing the path.
+
+No code change was needed for the canonicalisation: `index.html` already
+declared `https://khalidmued.com/` in `canonical`, `og:url`, `og:image`
+and `twitter:image` — those tags were written before the domain worked,
+and are simply true now. Both hostnames serve those same tags, so the
+alternate defers to the apex without a redirect, which is what was asked
+for.
+
+Deliberately not done: no `routes` block was added to `wrangler.jsonc`.
+Declaring custom domains there would make deploys reconcile the Worker's
+route list against the file, which risks detaching a hostname that isn't
+written down — exactly the "don't touch any other subdomains or wildcard
+routes" constraint. The domains stay dashboard-managed and this is now
+noted in CLAUDE.md so nobody "fixes" it later. `www.khalidmued.com` still
+has no records and was left alone.
+
+New open item found while checking: `og:image` points at an **SVG**. The
+URL serves fine, but LinkedIn, X, Facebook, Slack and WhatsApp won't
+render an SVG preview — that needs a raster card, usually PNG at
+1200x630.

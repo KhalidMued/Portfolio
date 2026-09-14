@@ -25,10 +25,20 @@ color system ties it all together (see `src/constants/categories.js`).
 - Contact form posts to `/api/contact`, a Cloudflare Worker
   (`worker/index.js`) that sends through Resend; React Toastify for
   notifications
-- Deployed to Cloudflare Workers at
-  **https://portfolio.khalid-mued.workers.dev** via bare
-  `npx wrangler deploy` — see `wrangler.jsonc`. (`khalidmued.com`, the
-  domain in `index.html`'s canonical tag, does not resolve yet.)
+- Deployed to Cloudflare Workers via bare `npx wrangler deploy` — see
+  `wrangler.jsonc`. **`https://khalidmued.com` is the primary URL** and
+  the one `index.html`'s `canonical` / `og:url` point at.
+  `https://portfolio.khalidmued.com` is a working alternate serving the
+  same Worker, and `https://portfolio.khalid-mued.workers.dev` still
+  answers as well. All three serve identical content and all of them
+  declare the apex as canonical, so search engines treat khalidmued.com
+  as the real address — **don't add a redirect between them**, and if you
+  change the canonical host, change it in all four tags in `index.html`
+  (`canonical`, `og:url`, `og:image`, `twitter:image`).
+- The hostnames are Cloudflare **Custom Domains configured in the
+  dashboard**, deliberately not declared as `routes` in `wrangler.jsonc`:
+  a deploy reconciles the route list, so declaring a subset risks
+  detaching a hostname nobody remembered to write down.
 
 ## Commands
 
