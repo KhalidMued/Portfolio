@@ -767,3 +767,51 @@ New open item found while checking: `og:image` points at an **SVG**. The
 URL serves fine, but LinkedIn, X, Facebook, Slack and WhatsApp won't
 render an SVG preview — that needs a raster card, usually PNG at
 1200x630.
+
+**Built a real OG card.** `og:image` and `twitter:image` pointed at
+`/logo.svg`. The URL served fine, but LinkedIn, X, Facebook, Slack and
+WhatsApp all ignore SVG for previews — they want a raster image, laid out
+in a 1.91:1 box — so the card rendered with no thumbnail at all. A square
+logo would also have been letterboxed there even as a PNG.
+
+`scripts/generate-og-card.mjs` now draws a 1200x630 card with
+`@napi-rs/canvas` (added as a devDependency) and writes
+`public/og-card.png`. Committing a generator rather than a hand-made file
+means the card can be edited later without hunting for whatever tool made
+it.
+
+The design pulls straight from the site so the two read as one thing: the
+dark `#050816` ground, violet/teal/amber/pink from
+`src/constants/categories.js`, Poppins at the same weights the site loads,
+a seeded starfield echoing `StarsCanvas`, the hero's concentric arc line
+art, and the two-colour role line ("Developer." violet, "Network &
+Security Engineer." teal) that states the positioning at a glance. A
+topology mesh sits over the arcs for the network half, a gradient bar
+across the top edge, category chips along the bottom.
+
+Details worth keeping:
+
+- The starfield is **seeded**, so regenerating an unchanged design
+  produces a byte-identical PNG. Verified by hashing across two runs.
+  Without that, every run would be a fresh binary diff.
+- The topology node coordinates are absolute and deliberately confined to
+  x > 840, y < 470 — the only region no text occupies. The first version
+  used polar coordinates and dropped nodes on top of "Engineer." and the
+  "AI & Automation" chip.
+- Google Fonts serves woff2 to modern browsers and plain TTF to old ones,
+  and `@napi-rs/canvas` needs the TTF — hence the deliberately ancient
+  `User-Agent` in the fetch. Fonts cache to `.cache/og-fonts/`
+  (gitignored).
+- Use `new Uint8Array(await res.arrayBuffer())` rather than `Buffer.from`:
+  the repo's ESLint config has no Node globals, so `Buffer` trips
+  `no-undef`.
+
+`index.html` also gained `og:image:type`, `:width`, `:height`, `:alt`,
+`twitter:image:alt`, `og:site_name` and `og:locale` — the dimensions in
+particular let crawlers lay the card out before the image finishes
+downloading.
+
+Verified: lint clean including `scripts/`, `npm run build` green, the PNG
+ships to `dist/og-card.png`, its header reads 1200x630, and the built
+HTML carries the new tags. Not yet live — previews won't change until a
+deploy, and the crawlers cache, so re-scrape after deploying.

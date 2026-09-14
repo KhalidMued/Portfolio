@@ -295,14 +295,11 @@ unless he asked for it in that exchange — see CLAUDE.md.
   the variable name and value length printed the whole line instead.
   Rotate in the Resend dashboard, update `.dev.vars`, re-run
   `npx wrangler secret put RESEND_API_KEY`, and redeploy. No code change.
-- **`og:image` is an SVG, which most link-preview crawlers reject.**
-  `index.html` points `og:image` and `twitter:image` at
-  `https://khalidmued.com/logo.svg`. That URL now serves correctly
-  (`200`, `image/svg+xml`), but LinkedIn, X, Facebook, Slack and
-  WhatsApp all want a raster image — typically PNG or JPEG at 1200x630 —
-  and will show no thumbnail for an SVG. Needs a real OG card image
-  before sharing the link anywhere it matters. Ask Khalid before
-  designing one.
+- **The OG card is built but not deployed yet.** `public/og-card.png`
+  exists and the tags point at it, but link previews won't change until
+  the site is redeployed — crawlers read the live HTML, and several of
+  them cache aggressively, so re-scrape in LinkedIn's Post Inspector /
+  X's Card Validator after deploying rather than trusting the first try.
 - **Resend is still on the shared `onboarding@resend.dev` sender.** Now
   that `khalidmued.com` resolves, verifying it in Resend would allow
   sending from that domain, lift the "delivery only to the Resend

@@ -50,6 +50,12 @@ color system ties it all together (see `src/constants/categories.js`).
 - `npm run build` — production build to `dist/`
 - `npm run preview` — serve the production build locally
 - `npm run lint` — ESLint
+- `npm run og:card` — regenerates `public/og-card.png`, the 1200x630
+  link-preview image, from `scripts/generate-og-card.mjs`. The output is
+  committed, so only run this when the card design changes. It's
+  deterministic (the starfield is seeded), so an unchanged design
+  regenerates byte-identically instead of producing binary churn. Fonts
+  are fetched from Google Fonts into `.cache/og-fonts/` on first run.
 
 No test suite exists yet.
 

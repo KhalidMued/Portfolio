@@ -32,3 +32,6 @@ dist-ssr
 
 # Local Worker secrets for `wrangler dev`
 .dev.vars
+
+# Generated-asset caches (fonts fetched by scripts/generate-og-card.mjs)
+.cache/
