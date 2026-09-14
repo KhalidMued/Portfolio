@@ -210,7 +210,7 @@ x.shadowColor = C.dev + 'aa';
 x.shadowBlur = 38;
 x.fillStyle = C.head;
 x.font = font(900, 82);
-x.fillText('Khalid Mohamed', 80, 258);
+x.fillText('Khalid Mudathir', 80, 258);
 x.restore();
 
 /* ---------- role line: two colours, two sides ---------- */

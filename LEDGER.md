@@ -863,3 +863,31 @@ Verified against `wrangler dev`: `/robots.txt` returns `200 text/plain`
 with the file's contents, a deep route still falls back to index.html,
 `/api/contact` still reaches the Worker (405 on GET), and the served CSP
 header no longer mentions emailjs.
+
+**Renamed "Khalid Mohamed" -> "Khalid Mudathir" everywhere.** 13
+occurrences across five files: `src/constants/index.js` (`heroContent.name`,
+the single source the app renders from), `index.html` (title, description,
+author, `og:title`, `og:site_name`, `og:image:alt`, `twitter:title`,
+`twitter:image:alt`), `README.md`, `CLAUDE.md`, and the name drawn on the
+OG card in `scripts/generate-og-card.mjs`.
+
+`public/og-card.png` regenerated so the card matches — this is exactly the
+case the generator was committed for. Checked the new name still clears the
+artwork before trusting it: at Poppins 900 / 82px, "Khalid Mudathir" is 702px
+wide against "Khalid Mohamed"'s 735px, so its right edge lands at x=782 and
+the nearest topology node starts at x=872. It got *narrower*, so no
+collision — but the measurement is the point, not the outcome.
+
+Left alone deliberately: the `khalidmued.com` domain and the
+`khalidmueddev@gmail.com` Resend address (neither contains the last name),
+and the historical entries above in this file, which record what was true
+when they were written.
+
+Note the hero only ever renders the first name —
+`heroContent.name.split(' ')[0]` in `Hero.jsx` — so the visible change on
+the site itself is the browser tab title and the link-preview metadata,
+not the headline.
+
+Verified: lint clean, build green, the built HTML carries the new name in
+every tag, the string is in the JS bundle, and `dist/og-card.png` hashes
+identical to `public/og-card.png`.

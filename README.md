@@ -1,6 +1,6 @@
-# Portfolio — Khalid Mohamed 🚀
+# Portfolio — Khalid Mudathir 🚀
 
-Personal portfolio for **Khalid Mohamed**, Developer and Network & Security
+Personal portfolio for **Khalid Mudathir**, Developer and Network & Security
 Engineer — built around the idea that both sides are one engineer, not two
 separate résumés. The site shows software projects and network/security
 work side by side (Skills, Works) with a shared color system tying them
