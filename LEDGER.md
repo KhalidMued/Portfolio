@@ -568,3 +568,31 @@ star to full strength and still screenshotting an empty page. The values
 were reasoned from the first pass's known-good baseline instead, and
 **Khalid confirmed the result by eye** before this was committed.
 `npx eslint src --ext js,jsx` clean, `npm run build` green.
+
+**PR #10 merged.** Squashed onto `main` as `abe5b62` — hero scroll-button
+hitbox, hero/About seam, navbar logo, and both light-mode starfield
+passes, plus the `CLAUDE.md` no-unasked-PRs instruction. Local branch
+`fix/hero-scroll-indicator-hitbox` deleted; `main` pulled and clean.
+
+Process note for next time: that branch ended up carrying six commits
+across four unrelated fixes, because the review pass kept landing on the
+branch that started as just the scroll-indicator fix. The repo's rhythm
+is one PR per change — cut a fresh branch off `origin/main` per topic.
+
+**Branch cleanup.** Deleted six merged branches — remote
+`fix/hero-scroll-indicator-hitbox`, `cleanup/safe-tidy`,
+`fix/remove-redirects-loop`; local `cleanup/safe-tidy`,
+`feature/audit-cleanup`, `fix/hero-scroll-indicator`. `main` is now the
+only branch on either side.
+
+Each was verified merged before deleting, which is less obvious than it
+sounds in a squash-merge repo: `git log origin/main..<branch>` shows
+commits for *every* branch here, merged or not, because the squash lands
+under a different SHA. `git cherry -v main <branch>` marks a commit `-`
+when an equivalent patch is already in `main`, which cleared five of
+them. #10's own branch read all `+` (six commits squashed into one), so
+the tree was compared instead — `git diff --stat
+origin/fix/hero-scroll-indicator-hitbox main` was empty, proving the
+squash captured everything. One commit on `fix/hero-scroll-indicator`
+read `+` as well (the CLAUDE.md no-unasked-PRs instruction); confirmed
+present in `main:CLAUDE.md` before deleting.
