@@ -1111,3 +1111,44 @@ with `leading-tight` and `break-words`, and the text column got `min-w-0`
 — a flex child defaults to `min-width:auto` and won't shrink below its
 content, which is how a long unbroken name would have forced the column
 wider than its share.
+
+**Earth globe enlarged on phones only** (`Earth.jsx`), per Khalid: too
+small for the space around it on mobile.
+
+The scale was a flat `1.8`, chosen back when `2.5` was clipping — but the
+clipping case was the desktop `xl` column, which is narrow and tall
+(589x927) and therefore has the least horizontal room of any layout. The
+camera shows a fixed 45° vertically, so horizontal extent is that times
+the aspect ratio; at `xl` that works out to 4.11 world units against 6.47
+vertical. The phone layout is the opposite shape — ~327x350, nearly
+square — with about 1.5x the horizontal room, so `1.8` there left a ring
+of dead space.
+
+Now `2.3` on phones and `1.8` everywhere else, keyed on
+`useThree(state => state.size.width) < 480`. **The canvas width, not the
+window's**: the canvas is ~327 on a phone but 625 at `md` and 589 at
+`xl`, so a window-width test would have caught `xl` — the one layout that
+must not grow — while a canvas-width cut at 480 separates the phone
+layout cleanly.
+
+Checked the arithmetic rather than guessing at the number. Deriving an
+upper bound for the model's extent from the fact that 1.8 fits the xl box
+(2.284 world units per unit of scale):
+
+| Layout | Canvas | Visible extent | Scale | Needs | Margin |
+| --- | --- | --- | --- | --- | --- |
+| 360px phone | 312x350 | 5.77 x 6.47 | 2.3 | 5.25 | 9% |
+| 390px phone | 327x350 | 6.05 x 6.47 | 2.3 | 5.25 | 13% |
+| 430px phone | 382x350 | 7.06 x 6.47 | 2.3 | 5.25 | 19% |
+| md 768 | 625x550 | 7.35 x 6.47 | 1.8 | 4.11 | 36% |
+| xl 1280 | 589x927 | 4.11 x 6.47 | 1.8 | 4.11 | 0% |
+
+The margins are conservative: the extent is an upper bound, since 1.8 was
+recorded as fitting the xl box *with* room to spare, so the real
+clearances are larger than shown. A 28% increase on phones with at least
+9% clearance on the smallest one.
+
+Not visually verified — the canvas never renders in this backgrounded
+browser (it sits at the unsized 300x150 default), so the numbers come
+from the CSS box measurements and the camera maths, not from looking.
+Worth an eyeball on a phone.
