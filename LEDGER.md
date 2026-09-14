@@ -950,3 +950,49 @@ was opened from inside the Facebook app, whose in-app browser shows
 Facebook's own icon in the iOS app switcher and share sheet. Asked
 Khalid where he opened it from. The missing icons were a real bug either
 way.
+
+**The whole About section was invisible on mobile.** Khalid: *"the whole
+introduction section i dont see it on the mobile. what i see is the top
+section then an empty space then the work experience section"*.
+
+`SectionWrapper` animates every section in with
+`whileInView` + `viewport={{ once: true, amount: 0.25 }}`. The trap is
+that **`amount` is a fraction of the element's own height**, not of the
+viewport. `0.25` means "a quarter of this section must be on screen
+simultaneously", which becomes unsatisfiable as soon as a section grows
+past four viewport heights.
+
+Measured in a 390px-wide iframe: the About section stacks to **3585px**
+tall on mobile, so `amount: 0.25` demanded **896px** visible at once.
+
+| Device | Screen | Usable Safari viewport | Result |
+| --- | --- | --- | --- |
+| iPhone SE | 667 | ~587 | never fires |
+| iPhone 14/15 | 844 | ~743 | never fires |
+| iPhone 15 Pro | 852 | ~750 | never fires |
+| iPhone 15 Pro Max | 932 | ~820 | never fires |
+
+The observer could never report 25%, `whileInView` never ran, and the
+section sat at its `hidden` variant — opacity 0 — while still occupying
+3585px of layout. Hence "top section, empty space, work experience".
+Every other section clears the bar (the next largest needs 609px), which
+is why only this one vanished, and why desktop looked perfect throughout.
+
+Fixed by making the trigger height-independent:
+`viewport={{ once: true, amount: "some", margin: "0px 0px -10% 0px" }}`.
+`"some"` is threshold 0, so it fires for any section at any height; the
+negative bottom margin keeps the timing pleasant by waiting until the
+section's top edge is ~10% into the viewport instead of firing on the
+first pixel. `SectionWrapper` is the only `whileInView` in the codebase,
+so this one change covers every section. Written up in CLAUDE.md as a
+standing rule: tune `margin`, never `amount`.
+
+Verification, honestly: the arithmetic above is deterministic and was
+measured from the real rendered DOM at phone width, but the animation
+itself could not be watched. The Chrome window is backgrounded, and a
+background tab runs neither rAF nor IntersectionObserver — an
+instrumented observer with the old and new options attached to the real
+section reported nothing for either, which is the tab being throttled,
+not evidence. Lint clean, build green, and both `amount:"some"` and the
+margin are present in the built bundle. Needs a look on a real phone
+after deploy.
