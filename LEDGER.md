@@ -1275,3 +1275,29 @@ Verified at 390 and 1280 by reading the rendered badges and their
 computed colours back: SecOps shows `Security rgb(0,206,168)` and
 `Infra rgb(245,166,35)`, the other two are unchanged, and neither width
 overflows horizontally.
+
+**Hero desk composition on phones: tried, and reverted by request.**
+Khalid asked for the setup moved right with the monitor front-left and
+the tower back-right, subtly angled; on seeing the result he asked for it
+back centred as before. Reverted to `position [0, -3, -2.2]` and the
+shared `rotation [-0.01, -0.2, -0.1]`. **Don't re-apply this without him
+asking** — it was a deliberate rejection, not an oversight.
+
+The measurement behind the attempt is worth keeping, though, because it
+is a real and non-obvious fact about the hero:
+
+Parsing `public/desktop_pc/scene.gltf`, the monitor sits at model z ~ +3
+and the tower at z ~ -3.6 — separated along **Z**. With the shipped yaw
+of -0.2 that separation maps almost entirely onto screen-X, which is fine
+on a wide desktop frame but, at a phone hero's ~0.44 aspect, puts the
+tower at NDC x=1.97. Projected through the real camera, **0% of the
+tower's width is on screen on a phone**: only the monitor is ever
+visible, and the accepted look is the monitor alone.
+
+Getting the tower into frame requires yawing to ~0.8rad, which also turns
+the monitor panel (it faces model +X) 60° off face-on. Tabulated across
+yaw, the window where the tower is visible *and* the monitor stays left
+of centre is only about 0.8-0.9rad. So "show the tower" and "keep the
+monitor facing the viewer" are mutually exclusive at phone aspect — the
+centred, monitor-only framing is the reasonable end of that trade, which
+is presumably why it reads better.
